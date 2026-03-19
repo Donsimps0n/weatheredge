@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WeatherEdge — Polymarket Weather Trading Bot</title>
+<title>WeatherEdge â Polymarket Weather Trading Bot</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -340,7 +340,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 <!-- MAIN -->
 <div class="main">
 
-  <!-- ── DASHBOARD ── -->
+  <!-- ââ DASHBOARD ââ -->
   <div id="tab-dashboard" class="tab-panel active">
     <div class="topbar">
       <span class="topbar-title">Dashboard</span>
@@ -375,7 +375,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
       <div class="two-col">
         <div class="card">
           <div class="card-title">
-            🧠 GFS Edge Analysis
+            ð§  GFS Edge Analysis
             <span class="connected-badge"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block"></span> GFS connected</span>
           </div>
           <div class="analysis-modes">
@@ -390,11 +390,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
         </div>
         <div>
           <div class="card" style="margin-bottom:12px">
-            <div class="card-title">📋 Open Positions <span id="pos-count" style="background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px">0</span></div>
+            <div class="card-title">ð Open Positions <span id="pos-count" style="background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px">0</span></div>
             <div id="open-positions" class="positions-empty">No open positions</div>
           </div>
           <div class="card">
-            <div class="card-title">🗂 Trade History</div>
+            <div class="card-title">ð Trade History</div>
             <div id="trade-history" class="positions-empty">No closed trades yet</div>
           </div>
         </div>
@@ -402,7 +402,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
     </div>
   </div>
 
-  <!-- ── MARKETS ── -->
+  <!-- ââ MARKETS ââ -->
   <div id="tab-markets" class="tab-panel">
     <div class="topbar">
       <span class="topbar-title">Weather Markets</span>
@@ -428,80 +428,80 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
     </div>
   </div>
 
-  <!-- ── TRADERS ── -->
+  <!-- ââ TRADERS ââ -->
   <div id="tab-traders" class="tab-panel">
     <div class="topbar"><span class="topbar-title">Top Weather Traders</span></div>
     <div style="padding:20px">
       <div id="traders-list">
         <div class="empty" style="padding:48px">
-          <div style="margin-bottom:8px;font-size:32px">👥</div>
+          <div style="margin-bottom:8px;font-size:32px">ð¥</div>
           Loading trader profiles...
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── SOURCES ── -->
+  <!-- ââ SOURCES ââ -->
   <div id="tab-sources" class="tab-panel">
     <div class="topbar"><span class="topbar-title">Data Sources & Edge Engine</span></div>
     <div style="padding:20px">
       <div class="source-grid">
         <div class="source-card">
           <div class="source-name" style="color:var(--blue)">Gamma API</div>
-          <div class="source-desc">Market discovery · Events · Tags</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Slug-based lookup · 7-day window</div>
+          <div class="source-desc">Market discovery Â· Events Â· Tags</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Slug-based lookup Â· 7-day window</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--cyan)">CLOB API</div>
-          <div class="source-desc">Orderbook · Prices · Trading</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Real-time bid/ask · Market orders</div>
+          <div class="source-desc">Orderbook Â· Prices Â· Trading</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Real-time bid/ask Â· Market orders</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--green)">Open-Meteo GFS</div>
-          <div class="source-desc">30-member ensemble · Global</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">00z/06z/12z/18z UTC · 16-day</div>
+          <div class="source-desc">30-member ensemble Â· Global</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">00z/06z/12z/18z UTC Â· 16-day</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--amber)">NWS (US only)</div>
           <div class="source-desc">Real obs + hourly forecast blend</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Airport stations · KLGA/KORD/KMIA</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Airport stations Â· KLGA/KORD/KMIA</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--purple)">KDE Probability</div>
           <div class="source-desc">Bayesian Beta-Binomial + KDE</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">integrate_box_1d · uncertainty output</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">integrate_box_1d Â· uncertainty output</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--pink)">Kelly Criterion</div>
-          <div class="source-desc">Fee-adjusted · Fractional</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">f* = (pW-qL)/(WL) · 0.25× default</div>
+          <div class="source-desc">Fee-adjusted Â· Fractional</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">f* = (pW-qL)/(WL) Â· 0.25Ã default</div>
           <span class="badge-active">ACTIVE</span>
         </div>
       </div>
       <div class="card">
         <div class="card-title">Edge Calculation Flow</div>
         <div class="flow-steps">
-          <div class="flow-step"><div class="flow-num">01</div><div><div class="flow-label">Discover</div><div class="flow-desc">Slug-based Polymarket lookup: <b>highest-temperature-in-{city}-on-{month}-{day}-{year}</b> for all 23 cities × 7 days ahead</div></div></div>
-          <div class="flow-step"><div class="flow-num">02</div><div><div class="flow-label">Parse</div><div class="flow-desc">Extract <b>city</b>, date, temperature unit (°C or °F), bin ranges from market question titles</div></div></div>
+          <div class="flow-step"><div class="flow-num">01</div><div><div class="flow-label">Discover</div><div class="flow-desc">Slug-based Polymarket lookup: <b>highest-temperature-in-{city}-on-{month}-{day}-{year}</b> for all 23 cities Ã 7 days ahead</div></div></div>
+          <div class="flow-step"><div class="flow-num">02</div><div><div class="flow-label">Parse</div><div class="flow-desc">Extract <b>city</b>, date, temperature unit (Â°C or Â°F), bin ranges from market question titles</div></div></div>
           <div class="flow-step"><div class="flow-num">03</div><div><div class="flow-label">Forecast</div><div class="flow-desc">Fetch <b>GFS 30-member ensemble</b> via Open-Meteo at ICAO airport coordinates (KLGA not Manhattan)</div></div></div>
           <div class="flow-step"><div class="flow-num">04</div><div><div class="flow-label">NWS Blend (US)</div><div class="flow-desc">For US cities: combine <b>real station observations</b> with hourly forecast to get daily maximum with time-weighting</div></div></div>
-          <div class="flow-step"><div class="flow-num">05</div><div><div class="flow-label">KDE Probability</div><div class="flow-desc">Bayesian Beta-Binomial + <b>Gaussian KDE</b> over 30 ensemble members → P(temperature in bin) with uncertainty</div></div></div>
-          <div class="flow-step"><div class="flow-num">06</div><div><div class="flow-label">MOS Correction</div><div class="flow-desc"><b>City/season bias correction</b> + spread factor + skill decay by lead day (day 7: 48×, day 10: 16×)</div></div></div>
-          <div class="flow-step"><div class="flow-num">07</div><div><div class="flow-label">Edge & Kelly</div><div class="flow-desc"><b>edge = GFS_prob − market_price</b> → EV = (p−P)/P − fee → fee-adjusted Kelly → position size</div></div></div>
+          <div class="flow-step"><div class="flow-num">05</div><div><div class="flow-label">KDE Probability</div><div class="flow-desc">Bayesian Beta-Binomial + <b>Gaussian KDE</b> over 30 ensemble members â P(temperature in bin) with uncertainty</div></div></div>
+          <div class="flow-step"><div class="flow-num">06</div><div><div class="flow-label">MOS Correction</div><div class="flow-desc"><b>City/season bias correction</b> + spread factor + skill decay by lead day (day 7: 48Ã, day 10: 16Ã)</div></div></div>
+          <div class="flow-step"><div class="flow-num">07</div><div><div class="flow-label">Edge & Kelly</div><div class="flow-desc"><b>edge = GFS_prob â market_price</b> â EV = (pâP)/P â fee â fee-adjusted Kelly â position size</div></div></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── RAIN MAP ── -->
+  <!-- ââ RAIN MAP ââ -->
   <div id="tab-rainmap" class="tab-panel">
     <div class="topbar">
-      <span class="topbar-title">GFS Forecast Map — March 20</span>
+      <span class="topbar-title">GFS Forecast Map â March 20</span>
       <button class="btn-save" style="background:var(--blue-dim);border:1px solid var(--blue);color:var(--blue);font-family:var(--sans);font-size:12px;padding:6px 14px;border-radius:6px;cursor:pointer">Refresh</button>
     </div>
     <div style="padding:20px">
@@ -527,27 +527,27 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
     </div>
   </div>
 
-  <!-- ── CONFIG ── -->
+  <!-- ââ CONFIG ââ -->
   <div id="tab-config" class="tab-panel">
     <div class="topbar"><span class="topbar-title">Configuration</span></div>
     <div style="padding:20px">
       <div class="config-grid">
         <div>
           <div class="config-section" style="margin-bottom:16px">
-            <div class="config-section-title">⚙️ Settings</div>
+            <div class="config-section-title">âï¸ Settings</div>
             <div class="field"><label>Bankroll ($)</label><input type="number" value="86" id="cfg-bankroll"/><div style="font-size:11px;color:var(--text3);margin-top:4px">(Applies to bot Edge trades)</div></div>
             <div class="field"><label>Max Per Trade ($)</label><input type="number" value="10" id="cfg-max"/><div style="font-size:11px;color:var(--text3);margin-top:4px">(Hard cap per position)</div></div>
             <div class="field"><label>Min Edge (%)</label><input type="number" value="8" id="cfg-edge"/></div>
             <div class="field"><label>Kelly Fraction</label><input type="number" value="0.25" step="0.05" id="cfg-kelly"/></div>
             <div class="field"><label>Scan Interval (sec)</label><input type="number" value="300" id="cfg-interval"/></div>
-            <button class="btn-save" onclick="saveConfig()">💾 Save</button>
+            <button class="btn-save" onclick="saveConfig()">ð¾ Save</button>
           </div>
           <div class="config-section">
-            <div class="config-section-title">🤖 AI Engine</div>
+            <div class="config-section-title">ð¤ AI Engine</div>
             <div class="ai-engine">
               <div>
                 <div class="ai-name">GFS Ensemble Engine</div>
-                <div class="ai-sub">KDE probability · Fee-adjusted Kelly · NWS blend</div>
+                <div class="ai-sub">KDE probability Â· Fee-adjusted Kelly Â· NWS blend</div>
               </div>
               <span class="badge-connected">CONNECTED</span>
             </div>
@@ -555,12 +555,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
         </div>
         <div>
           <div class="config-section" style="margin-bottom:16px">
-            <div class="config-section-title">🔗 Wallet</div>
+            <div class="config-section-title">ð Wallet</div>
             <div class="field">
               <label>Polymarket Proxy Address</label>
               <input type="text" id="cfg-wallet" placeholder="0x... (connect via Polymarket.com)" style="font-size:12px"/>
               <div style="font-size:11px;color:var(--amber);margin-top:6px;background:var(--amber-dim);padding:8px 10px;border-radius:6px;border:1px solid rgba(245,158,11,.2)">
-                ⚠️ Never enter your private key anywhere. Connect wallet directly on Polymarket.com and paste your proxy address here only.
+                â ï¸ Never enter your private key anywhere. Connect wallet directly on Polymarket.com and paste your proxy address here only.
               </div>
             </div>
             <div class="field"><label>Trading Mode</label>
@@ -571,7 +571,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
             </div>
           </div>
           <div class="config-section">
-            <div class="config-section-title">📡 Data Sources</div>
+            <div class="config-section-title">ð¡ Data Sources</div>
             <div style="font-size:12px;display:flex;flex-direction:column;gap:8px">
               <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">GFS Ensemble (Open-Meteo)</span><span class="badge-active" style="font-size:10px">ON</span></div>
               <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">NWS (US cities only)</span><span class="badge-active" style="font-size:10px">ON</span></div>
@@ -584,23 +584,23 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
     </div>
   </div>
 
-  <!-- ── INFO ── -->
+  <!-- ââ INFO ââ -->
   <div id="tab-info" class="tab-panel">
     <div class="topbar"><span class="topbar-title">How WeatherEdge Finds Edge</span></div>
     <div style="padding:20px;max-width:760px">
       <div class="info-section">
         <h2>The complete pipeline behind every trade signal</h2>
-        <p>WeatherEdge automates the entire Polymarket weather trading pipeline — from market discovery to trade execution — using real GFS ensemble forecasts and fee-adjusted Kelly sizing.</p>
+        <p>WeatherEdge automates the entire Polymarket weather trading pipeline â from market discovery to trade execution â using real GFS ensemble forecasts and fee-adjusted Kelly sizing.</p>
       </div>
       <div class="info-step">
         <div class="info-step-num">01</div>
-        <div><h3>Market Discovery</h3><p>Queries Polymarket's Gamma API using direct slug-based lookup for all 23 cities × next 7 days. Falls back to tag search for any non-standard slugs. Identifies all active temperature bins per event.</p></div>
+        <div><h3>Market Discovery</h3><p>Queries Polymarket's Gamma API using direct slug-based lookup for all 23 cities Ã next 7 days. Falls back to tag search for any non-standard slugs. Identifies all active temperature bins per event.</p></div>
       </div>
       <div class="info-step">
         <div class="info-step-num">02</div>
-        <div><h3>Fetch GFS 30-Member Ensemble</h3><p>Downloads 30 independent GFS model runs from Open-Meteo at ICAO airport station coordinates (not city centres — airport stations match Polymarket's resolution source). Run 4× daily at 00z/06z/12z/18z UTC.</p>
+        <div><h3>Fetch GFS 30-Member Ensemble</h3><p>Downloads 30 independent GFS model runs from Open-Meteo at ICAO airport station coordinates (not city centres â airport stations match Polymarket's resolution source). Run 4Ã daily at 00z/06z/12z/18z UTC.</p>
         <div class="info-model-grid">
-          <div class="info-model"><div class="info-model-name">GFS Ensemble</div><div class="info-model-desc">30 members · ICAO coords · 16-day horizon</div></div>
+          <div class="info-model"><div class="info-model-name">GFS Ensemble</div><div class="info-model-desc">30 members Â· ICAO coords Â· 16-day horizon</div></div>
           <div class="info-model"><div class="info-model-name">NWS (US cities)</div><div class="info-model-desc">Real hourly observations + forecast blend</div></div>
         </div></div>
       </div>
@@ -614,16 +614,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
       </div>
       <div class="info-step">
         <div class="info-step-num">05</div>
-        <div><h3>Edge Detection & Dual-Source Confirmation</h3><p>edge = GFS_probability − market_price. Only trades where both GFS ensemble AND NWS deterministic forecast agree on the direction (within 5°F/3°C). Eliminates model-conflict situations like Dallas on March 20 (GFS 88°F vs NWS 94°F → skip).</p></div>
+        <div><h3>Edge Detection & Dual-Source Confirmation</h3><p>edge = GFS_probability â market_price. Only trades where both GFS ensemble AND NWS deterministic forecast agree on the direction (within 5Â°F/3Â°C). Eliminates model-conflict situations like Dallas on March 20 (GFS 88Â°F vs NWS 94Â°F â skip).</p></div>
       </div>
       <div class="info-step">
         <div class="info-step-num">06</div>
-        <div><h3>Fee-Adjusted Kelly Sizing</h3><p>f* = (p×W − q×L) / (W×L) where W = payout − fee, L = 1 + fee. Uses quarter-Kelly (0.25×) by default. Discounts Kelly by uncertainty estimate and lead-day skill decay. LMSR price impact check prevents over-sized orders.</p></div>
+        <div><h3>Fee-Adjusted Kelly Sizing</h3><p>f* = (pÃW â qÃL) / (WÃL) where W = payout â fee, L = 1 + fee. Uses quarter-Kelly (0.25Ã) by default. Discounts Kelly by uncertainty estimate and lead-day skill decay. LMSR price impact check prevents over-sized orders.</p></div>
       </div>
     </div>
   </div>
 
-  <!-- ── LOG ── -->
+  <!-- ââ LOG ââ -->
   <div id="tab-log" class="tab-panel">
     <div class="topbar"><span class="topbar-title">Activity Log</span></div>
     <div style="padding:20px">
@@ -643,7 +643,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 </div><!-- end main -->
 
 <script>
-// ── STATE ──────────────────────────────────────────────────
+// ââ STATE ââââââââââââââââââââââââââââââââââââââââââââââââââ
 const state = {
   scanning: false,
   botRunning: false,
@@ -655,7 +655,7 @@ const state = {
   config: { bankroll:86, max:10, edge:8, kelly:0.25, interval:300 }
 };
 
-// ── TAB SWITCHING ──────────────────────────────────────────
+// ââ TAB SWITCHING ââââââââââââââââââââââââââââââââââââââââââ
 function switchTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
@@ -665,7 +665,7 @@ function switchTab(name, btn) {
   if(name === 'traders') loadTraders();
 }
 
-// ── LOGGING ───────────────────────────────────────────────
+// ââ LOGGING âââââââââââââââââââââââââââââââââââââââââââââââ
 function addLog(msg, type='info') {
   const now = new Date();
   const time = now.toTimeString().substring(0,8);
@@ -689,7 +689,7 @@ function addLog(msg, type='info') {
   fl.prepend(fe);
 }
 
-// ── SCAN MARKETS ──────────────────────────────────────────
+// ââ SCAN MARKETS ââââââââââââââââââââââââââââââââââââââââââ
 async function scanMarkets() {
   if(state.scanning) return;
   state.scanning = true;
@@ -749,24 +749,24 @@ function renderMarketList() {
     const pct = (m.yes*100).toFixed(1);
     const dayLabel = m.daysAhead===0?'Today':m.daysAhead===1?'Tomorrow':`+${m.daysAhead}d`;
     return `<div class="market-item">
-      <div class="market-icon">🌡️</div>
+      <div class="market-icon">ð¡ï¸</div>
       <div class="market-info">
         <div class="market-title">${m.question.substring(0,80)}</div>
         <div class="market-meta">
-          <span>📅 ${m.date}</span>
-          <span>💰 $${(m.vol/1000).toFixed(0)}k vol</span>
+          <span>ð ${m.date}</span>
+          <span>ð° $${(m.vol/1000).toFixed(0)}k vol</span>
           <span>${dayLabel}</span>
         </div>
       </div>
       <div style="text-align:right;flex-shrink:0">
-        <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:${m.yes<0.15?'var(--green)':m.yes>0.60?'var(--red)':'var(--amber)'}">${pct}¢</div>
+        <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:${m.yes<0.15?'var(--green)':m.yes>0.60?'var(--red)':'var(--amber)'}">${pct}Â¢</div>
         <span class="badge pending">PENDING</span>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── BOT TOGGLE ────────────────────────────────────────────
+// ââ BOT TOGGLE ââââââââââââââââââââââââââââââââââââââââââââ
 function toggleBot() {
   state.botRunning = !state.botRunning;
   const btn = document.getElementById('btn-start');
@@ -774,7 +774,7 @@ function toggleBot() {
   if(state.botRunning){
     btn.classList.add('running');
     txt.textContent = 'Stop Bot';
-    addLog('Bot started — scanning every '+state.config.interval+'s', 'scan');
+    addLog('Bot started â scanning every '+state.config.interval+'s', 'scan');
   } else {
     btn.classList.remove('running');
     txt.textContent = 'Start Bot';
@@ -782,14 +782,14 @@ function toggleBot() {
   }
 }
 
-// ── MODE ─────────────────────────────────────────────────
+// ââ MODE âââââââââââââââââââââââââââââââââââââââââââââââââ
 function setMode(el, mode) {
   document.querySelectorAll('.mode-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   state.mode = mode;
 }
 
-// ── ANALYZE ──────────────────────────────────────────────
+// ââ ANALYZE ââââââââââââââââââââââââââââââââââââââââââââââ
 async function analyzeTop() {
   if(!state.markets.length){ addLog('Scan markets first', 'warn'); return; }
   const out = document.getElementById('analysis-output');
@@ -806,34 +806,34 @@ async function analyzeTop() {
       const samples=keys.map(k=>loc.daily[k][0]).filter(v=>v!==null);
       const mean=samples.reduce((a,v)=>a+v,0)/samples.length;
       const std=Math.sqrt(samples.map(v=>(v-mean)**2).reduce((a,v)=>a+v,0)/samples.length);
-      return `${cities[i]}: ${mean.toFixed(1)}°F ±${std.toFixed(1)}`;
+      return `${cities[i]}: ${mean.toFixed(1)}Â°F Â±${std.toFixed(1)}`;
     });
     document.getElementById('stat-edge').textContent = '3';
     document.getElementById('stat-live').textContent = '2';
     document.getElementById('m-edge').textContent = '3';
     out.style.color = 'var(--text)';
-    out.innerHTML = results.map(r=>`<div style="padding:4px 0;border-bottom:1px solid var(--border)">${r}</div>`).join('')+'<div style="margin-top:8px;color:var(--green)">✓ 3 edges found — see Markets tab for details</div>';
-    addLog('GFS analysis complete — 3 edges found', 'edge');
+    out.innerHTML = results.map(r=>`<div style="padding:4px 0;border-bottom:1px solid var(--border)">${r}</div>`).join('')+'<div style="margin-top:8px;color:var(--green)">â 3 edges found â see Markets tab for details</div>';
+    addLog('GFS analysis complete â 3 edges found', 'edge');
   } catch(e) {
-    out.textContent = 'GFS fetch failed — check network';
+    out.textContent = 'GFS fetch failed â check network';
     out.style.color = 'var(--red)';
   }
 }
 
-// ── CONFIG SAVE ───────────────────────────────────────────
+// ââ CONFIG SAVE âââââââââââââââââââââââââââââââââââââââââââ
 function saveConfig() {
   state.config.bankroll = parseFloat(document.getElementById('cfg-bankroll').value)||86;
   state.config.max = parseFloat(document.getElementById('cfg-max').value)||10;
   state.config.edge = parseFloat(document.getElementById('cfg-edge').value)||8;
   state.config.kelly = parseFloat(document.getElementById('cfg-kelly').value)||0.25;
   state.config.interval = parseInt(document.getElementById('cfg-interval').value)||300;
-  addLog('Config saved — bankroll $'+state.config.bankroll+' max $'+state.config.max+'/trade', 'info');
+  addLog('Config saved â bankroll $'+state.config.bankroll+' max $'+state.config.max+'/trade', 'info');
 }
 
-// ── TRADERS ──────────────────────────────────────────────
+// ââ TRADERS ââââââââââââââââââââââââââââââââââââââââââââââ
 async function loadTraders() {
   const list = document.getElementById('traders-list');
-  list.innerHTML = '<div class="empty" style="padding:48px"><div style="font-size:32px;margin-bottom:8px">👥</div>Loading top weather traders...</div>';
+  list.innerHTML = '<div class="empty" style="padding:48px"><div style="font-size:32px;margin-bottom:8px">ð¥</div>Loading top weather traders...</div>';
   try {
     const r = await fetch('https://data-api.polymarket.com/leaderboard?window=monthly&limit=20');
     const data = await r.json();
@@ -844,7 +844,7 @@ async function loadTraders() {
         <span class="trader-rank">#${i+1}</span>
         <div style="flex:1">
           <div class="trader-addr">${(t.name||t.proxyWallet||t.address||'').substring(0,18)}...</div>
-          <div class="trader-trades">${t.tradesCount||t.numTrades||'—'} trades</div>
+          <div class="trader-trades">${t.tradesCount||t.numTrades||'â'} trades</div>
         </div>
         <span class="trader-pnl">${t.pnl>=0?'+':''}$${parseFloat(t.pnl||0).toFixed(0)}</span>
       </div>`).join('');
@@ -853,31 +853,75 @@ async function loadTraders() {
   }
 }
 
-// ── FORECAST MAP ─────────────────────────────────────────
+// ââ FORECAST MAP âââââââââââââââââââââââââââââââââââââââââ
 function renderMap() {
   const cities = [
-    {name:'Chicago',x:220,y:165,temp:'62°F',gfs:'61.9'},
-    {name:'Miami',x:230,y:220,temp:'75°F',gfs:'74.3'},
-    {name:'Dallas',x:195,y:195,temp:'94°F',gfs:'88.1'},
-    {name:'Seattle',x:145,y:148,temp:'56°F',gfs:'53.7'},
-    {name:'Atlanta',x:225,y:200,temp:'74°F',gfs:'72.6'},
-    {name:'London',x:430,y:140,temp:'15°C',gfs:'14.0'},
-    {name:'Paris',x:445,y:148,temp:'14°C',gfs:'13.5'},
-    {name:'Oslo',x:460,y:128,temp:'8°C',gfs:'7.8'},
-    {name:'Tokyo',x:745,y:165,temp:'17°C',gfs:'16.2'},
+    {name:'Chicago',x:220,y:165,temp:'62Â°F',gfs:'61.9'},
+    {name:'Miami',x:230,y:220,temp:'75Â°F',gfs:'74.3'},
+    {name:'Dallas',x:195,y:195,temp:'94Â°F',gfs:'88.1'},
+    {name:'Seattle',x:145,y:148,temp:'56Â°F',gfs:'53.7'},
+    {name:'Atlanta',x:225,y:200,temp:'74Â°F',gfs:'72.6'},
+    {name:'London',x:430,y:140,temp:'15Â°C',gfs:'14.0'},
+    {name:'Paris',x:445,y:148,temp:'14Â°C',gfs:'13.5'},
+    {name:'Oslo',x:460,y:128,temp:'8Â°C',gfs:'7.8'},
+    {name:'Tokyo',x:745,y:165,temp:'17Â°C',gfs:'16.2'},
   ];
   const dots = document.getElementById('map-dots');
   dots.innerHTML = cities.map(c=>`
-    <div style="position:absolute;left:${c.x/900*100}%;top:${c.y/460*100}%;transform:translate(-50%,-50%);text-align:center;cursor:pointer" title="${c.name}: NWS ${c.temp} / GFS ${c.gfs}°">
+    <div style="position:absolute;left:${c.x/900*100}%;top:${c.y/460*100}%;transform:translate(-50%,-50%);text-align:center;cursor:pointer" title="${c.name}: NWS ${c.temp} / GFS ${c.gfs}Â°">
       <div style="width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid rgba(59,130,246,.4);margin:0 auto 2px;animation:pulse 2s infinite"></div>
       <div style="font-family:var(--mono);font-size:9px;color:var(--text2);white-space:nowrap;background:rgba(11,15,25,.7);padding:1px 4px;border-radius:3px">${c.name}</div>
     </div>`).join('');
   const legend = document.getElementById('map-legend');
-  legend.innerHTML = cities.map(c=>`<span style="color:var(--text2)">📍 <b style="color:var(--blue)">${c.name}</b> GFS:${c.gfs} NWS:${c.temp}</span>`).join('');
+  legend.innerHTML = cities.map(c=>`<span style="color:var(--text2)">ð <b style="color:var(--blue)">${c.name}</b> GFS:${c.gfs} NWS:${c.temp}</span>`).join('');
 }
 
 // Init
-addLog('WeatherEdge initialized — ready to scan', 'info');
+addLog('WeatherEdge initialized â ready to scan', 'info');
+</script>
+
+<script>
+// WeatherEdge Live Data Integration
+const BOT_API = "https://weatheredge-production.up.railway.app";
+async function fetchLiveData() {
+  try {
+    const [stats, positions] = await Promise.all([
+      fetch(BOT_API + "/api/stats").then(r=>r.json()),
+      fetch(BOT_API + "/api/positions").then(r=>r.json())
+    ]);
+    // Update stats displays
+    const els = {
+      markets: document.querySelectorAll('[data-stat="markets"], .markets-scanned, #markets-scanned'),
+      edges:   document.querySelectorAll('[data-stat="edges"], .edges-found, #edges-found'),
+      mode:    document.querySelectorAll('[data-stat="mode"], .bot-mode, #bot-mode'),
+      lastScan:document.querySelectorAll('[data-stat="last-scan"], .last-scan, #last-scan'),
+    };
+    if(stats.markets_scanned !== undefined) {
+      document.querySelectorAll('.stat-value, .metric-value').forEach((el,i)=>{
+        if(i===0) el.textContent = stats.markets_scanned;
+        if(i===1) el.textContent = stats.edges_found;
+        if(i===2) el.textContent = stats.live_edges;
+      });
+    }
+    // Show live indicator
+    let badge = document.getElementById('live-badge');
+    if(!badge) {
+      badge = document.createElement('div');
+      badge.id = 'live-badge';
+      badge.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#22c55e;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,.3)';
+      document.body.appendChild(badge);
+    }
+    const t = stats.last_scan ? new Date(stats.last_scan).toLocaleTimeString() : 'waiting...';
+    badge.textContent = '🟢 LIVE · ' + stats.bot_mode + ' · Last scan: ' + t;
+    badge.style.background = '#22c55e';
+  } catch(e) {
+    let badge = document.getElementById('live-badge');
+    if(!badge) { badge=document.createElement('div'); badge.id='live-badge'; badge.style.cssText='position:fixed;bottom:20px;right:20px;background:#ef4444;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:9999'; document.body.appendChild(badge); }
+    badge.textContent = '🔴 Bot API connecting...';
+    badge.style.background = '#f97316';
+  }
+}
+document.addEventListener('DOMContentLoaded', ()=>{ fetchLiveData(); setInterval(fetchLiveData, 30000); });
 </script>
 </body>
 </html>
