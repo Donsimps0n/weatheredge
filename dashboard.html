@@ -32,6 +32,7 @@
   }
   window.doSwitchTab = doSwitchTab;
   window.switchTab = doSwitchTab;
+  window._st = doSwitchTab;
   setTimeout(function() {
     document.querySelectorAll("[onclick]").forEach(function(el) {
       var oc = el.getAttribute("onclick") || "";
