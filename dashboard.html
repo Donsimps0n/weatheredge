@@ -52,10 +52,10 @@ window.weLoadTraders = function() {
   var el = document.getElementById("lb-body");
   if (!el) return;
   el.innerHTML = "<div style=\"text-align:center;padding:30px;color:var(--text3)\">Loading&#8230;</div>";
-  fetch("https://polymarketanalytics.com/api/traders-tag-performance?tag=Weather&sortDirection=ASC&limit=10&offset=0&sortColumn=rank&minPnL=-59949&maxPnL=227556&minWinRate=0&maxWinRate=97&minTotalPositions=1&maxTotalPositions=19850")
+  fetch("https://weatheredge-production.up.railway.app/api/traders")
     .then(function(r){return r.json();})
     .then(function(data){
-      var list = data.data || data || [];
+      var list = data.traders || data.data || data || [];
       if (!list.length) { el.innerHTML = "<div style=\"padding:30px;text-align:center;color:var(--text3)\">No data</div>"; return; }
       el.innerHTML = list.slice(0,10).map(function(t, i) {
         var rk = i+1;
