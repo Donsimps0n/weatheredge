@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WeatherEdge ÃÂ¢ÃÂÃÂ Polymarket Weather Trading Bot</title>
+<title>WeatherEdge — Polymarket Weather Trading Bot</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -375,7 +375,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
       <div class="two-col">
         <div class="card">
           <div class="card-title">
-            ÃÂ°ÃÂÃÂ§ÃÂ  GFS Edge Analysis
+            Ã°ÃÂÃÂ§ÃÂ  GFS Edge Analysis
             <span class="connected-badge"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block"></span> GFS connected</span>
           </div>
           <div class="analysis-modes">
@@ -390,11 +390,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
         </div>
         <div>
           <div class="card" style="margin-bottom:12px">
-            <div class="card-title">ÃÂ°ÃÂÃÂÃÂ Open Positions <span id="pos-count" style="background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px">0</span></div>
+            <div class="card-title">Ã°ÃÂÃÂÃÂ Open Positions <span id="pos-count" style="background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:10px">0</span></div>
             <div id="open-positions" class="positions-empty">No open positions</div>
           </div>
           <div class="card">
-            <div class="card-title">ÃÂ°ÃÂÃÂÃÂ Trade History</div>
+            <div class="card-title">Ã°ÃÂÃÂÃÂ Trade History</div>
             <div id="trade-history" class="positions-empty">No closed trades yet</div>
           </div>
         </div>
@@ -434,7 +434,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
     <div style="padding:20px">
       <div id="traders-list">
         <div class="empty" style="padding:48px">
-          <div style="margin-bottom:8px;font-size:32px">ÃÂ°ÃÂÃÂÃÂ¥</div>
+          <div style="margin-bottom:8px;font-size:32px">Ã°ÃÂÃÂÃÂ¥</div>
           Loading trader profiles...
         </div>
       </div>
@@ -448,38 +448,38 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
       <div class="source-grid">
         <div class="source-card">
           <div class="source-name" style="color:var(--blue)">Gamma API</div>
-          <div class="source-desc">Market discovery ÃÂÃÂ· Events ÃÂÃÂ· Tags</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Slug-based lookup ÃÂÃÂ· 7-day window</div>
+          <div class="source-desc">Market discovery ÃÂÃ· Events ÃÂÃ· Tags</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Slug-based lookup ÃÂÃ· 7-day window</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--cyan)">CLOB API</div>
-          <div class="source-desc">Orderbook ÃÂÃÂ· Prices ÃÂÃÂ· Trading</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Real-time bid/ask ÃÂÃÂ· Market orders</div>
+          <div class="source-desc">Orderbook ÃÂÃ· Prices ÃÂÃ· Trading</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Real-time bid/ask ÃÂÃ· Market orders</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--green)">Open-Meteo GFS</div>
-          <div class="source-desc">30-member ensemble ÃÂÃÂ· Global</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">00z/06z/12z/18z UTC ÃÂÃÂ· 16-day</div>
+          <div class="source-desc">30-member ensemble ÃÂÃ· Global</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">00z/06z/12z/18z UTC ÃÂÃ· 16-day</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--amber)">NWS (US only)</div>
           <div class="source-desc">Real obs + hourly forecast blend</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Airport stations ÃÂÃÂ· KLGA/KORD/KMIA</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">Airport stations ÃÂÃ· KLGA/KORD/KMIA</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--purple)">KDE Probability</div>
           <div class="source-desc">Bayesian Beta-Binomial + KDE</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">integrate_box_1d ÃÂÃÂ· uncertainty output</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">integrate_box_1d ÃÂÃ· uncertainty output</div>
           <span class="badge-active">ACTIVE</span>
         </div>
         <div class="source-card">
           <div class="source-name" style="color:var(--pink)">Kelly Criterion</div>
-          <div class="source-desc">Fee-adjusted ÃÂÃÂ· Fractional</div>
-          <div class="source-rate" style="font-family:var(--mono);font-size:11px">f* = (pW-qL)/(WL) ÃÂÃÂ· 0.25ÃÂÃÂ default</div>
+          <div class="source-desc">Fee-adjusted ÃÂÃ· Fractional</div>
+          <div class="source-rate" style="font-family:var(--mono);font-size:11px">f* = (pW-qL)/(WL) ÃÂÃ· 0.25ÃÂÃÂ default</div>
           <span class="badge-active">ACTIVE</span>
         </div>
       </div>
@@ -487,7 +487,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
         <div class="card-title">Edge Calculation Flow</div>
         <div class="flow-steps">
           <div class="flow-step"><div class="flow-num">01</div><div><div class="flow-label">Discover</div><div class="flow-desc">Slug-based Polymarket lookup: <b>highest-temperature-in-{city}-on-{month}-{day}-{year}</b> for all 23 cities ÃÂÃÂ 7 days ahead</div></div></div>
-          <div class="flow-step"><div class="flow-num">02</div><div><div class="flow-label">Parse</div><div class="flow-desc">Extract <b>city</b>, date, temperature unit (ÃÂÃÂ°C or ÃÂÃÂ°F), bin ranges from market question titles</div></div></div>
+          <div class="flow-step"><div class="flow-num">02</div><div><div class="flow-label">Parse</div><div class="flow-desc">Extract <b>city</b>, date, temperature unit (ÃÂÃ°C or ÃÂÃ°F), bin ranges from market question titles</div></div></div>
           <div class="flow-step"><div class="flow-num">03</div><div><div class="flow-label">Forecast</div><div class="flow-desc">Fetch <b>GFS 30-member ensemble</b> via Open-Meteo at ICAO airport coordinates (KLGA not Manhattan)</div></div></div>
           <div class="flow-step"><div class="flow-num">04</div><div><div class="flow-label">NWS Blend (US)</div><div class="flow-desc">For US cities: combine <b>real station observations</b> with hourly forecast to get daily maximum with time-weighting</div></div></div>
           <div class="flow-step"><div class="flow-num">05</div><div><div class="flow-label">KDE Probability</div><div class="flow-desc">Bayesian Beta-Binomial + <b>Gaussian KDE</b> over 30 ensemble members ÃÂ¢ÃÂÃÂ P(temperature in bin) with uncertainty</div></div></div>
@@ -540,14 +540,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
             <div class="field"><label>Min Edge (%)</label><input type="number" value="8" id="cfg-edge"/></div>
             <div class="field"><label>Kelly Fraction</label><input type="number" value="0.25" step="0.05" id="cfg-kelly"/></div>
             <div class="field"><label>Scan Interval (sec)</label><input type="number" value="300" id="cfg-interval"/></div>
-            <button class="btn-save" onclick="saveConfig()">ÃÂ°ÃÂÃÂÃÂ¾ Save</button>
+            <button class="btn-save" onclick="saveConfig()">Ã°ÃÂÃÂÃÂ¾ Save</button>
           </div>
           <div class="config-section">
-            <div class="config-section-title">ÃÂ°ÃÂÃÂ¤ÃÂ AI Engine</div>
+            <div class="config-section-title">Ã°ÃÂÃÂ¤ÃÂ AI Engine</div>
             <div class="ai-engine">
               <div>
                 <div class="ai-name">GFS Ensemble Engine</div>
-                <div class="ai-sub">KDE probability ÃÂÃÂ· Fee-adjusted Kelly ÃÂÃÂ· NWS blend</div>
+                <div class="ai-sub">KDE probability ÃÂÃ· Fee-adjusted Kelly ÃÂÃ· NWS blend</div>
               </div>
               <span class="badge-connected">CONNECTED</span>
             </div>
@@ -555,7 +555,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
         </div>
         <div>
           <div class="config-section" style="margin-bottom:16px">
-            <div class="config-section-title">ÃÂ°ÃÂÃÂÃÂ Wallet</div>
+            <div class="config-section-title">Ã°ÃÂÃÂÃÂ Wallet</div>
             <div class="field">
               <label>Polymarket Proxy Address</label>
               <input type="text" id="cfg-wallet" placeholder="0x... (connect via Polymarket.com)" style="font-size:12px"/>
@@ -571,7 +571,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
             </div>
           </div>
           <div class="config-section">
-            <div class="config-section-title">ÃÂ°ÃÂÃÂÃÂ¡ Data Sources</div>
+            <div class="config-section-title">Ã°ÃÂÃÂÃÂ¡ Data Sources</div>
             <div style="font-size:12px;display:flex;flex-direction:column;gap:8px">
               <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">GFS Ensemble (Open-Meteo)</span><span class="badge-active" style="font-size:10px">ON</span></div>
               <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">NWS (US cities only)</span><span class="badge-active" style="font-size:10px">ON</span></div>
@@ -600,7 +600,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
         <div class="info-step-num">02</div>
         <div><h3>Fetch GFS 30-Member Ensemble</h3><p>Downloads 30 independent GFS model runs from Open-Meteo at ICAO airport station coordinates (not city centres ÃÂ¢ÃÂÃÂ airport stations match Polymarket's resolution source). Run 4ÃÂÃÂ daily at 00z/06z/12z/18z UTC.</p>
         <div class="info-model-grid">
-          <div class="info-model"><div class="info-model-name">GFS Ensemble</div><div class="info-model-desc">30 members ÃÂÃÂ· ICAO coords ÃÂÃÂ· 16-day horizon</div></div>
+          <div class="info-model"><div class="info-model-name">GFS Ensemble</div><div class="info-model-desc">30 members ÃÂÃ· ICAO coords ÃÂÃ· 16-day horizon</div></div>
           <div class="info-model"><div class="info-model-name">NWS (US cities)</div><div class="info-model-desc">Real hourly observations + forecast blend</div></div>
         </div></div>
       </div>
@@ -614,7 +614,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
       </div>
       <div class="info-step">
         <div class="info-step-num">05</div>
-        <div><h3>Edge Detection & Dual-Source Confirmation</h3><p>edge = GFS_probability ÃÂ¢ÃÂÃÂ market_price. Only trades where both GFS ensemble AND NWS deterministic forecast agree on the direction (within 5ÃÂÃÂ°F/3ÃÂÃÂ°C). Eliminates model-conflict situations like Dallas on March 20 (GFS 88ÃÂÃÂ°F vs NWS 94ÃÂÃÂ°F ÃÂ¢ÃÂÃÂ skip).</p></div>
+        <div><h3>Edge Detection & Dual-Source Confirmation</h3><p>edge = GFS_probability ÃÂ¢ÃÂÃÂ market_price. Only trades where both GFS ensemble AND NWS deterministic forecast agree on the direction (within 5ÃÂÃ°F/3ÃÂÃ°C). Eliminates model-conflict situations like Dallas on March 20 (GFS 88ÃÂÃ°F vs NWS 94ÃÂÃ°F ÃÂ¢ÃÂÃÂ skip).</p></div>
       </div>
       <div class="info-step">
         <div class="info-step-num">06</div>
@@ -733,12 +733,12 @@ function renderMarketList() {
     const pct = (m.yes*100).toFixed(1);
     const dayLabel = m.daysAhead===0?'Today':m.daysAhead===1?'Tomorrow':`+${m.daysAhead}d`;
     return `<div class="market-item">
-      <div class="market-icon">ÃÂ°ÃÂÃÂÃÂ¡ÃÂ¯ÃÂ¸ÃÂ</div>
+      <div class="market-icon">Ã°ÃÂÃÂÃÂ¡ÃÂ¯ÃÂ¸ÃÂ</div>
       <div class="market-info">
         <div class="market-title">${m.question.substring(0,80)}</div>
         <div class="market-meta">
-          <span>ÃÂ°ÃÂÃÂÃÂ ${m.date}</span>
-          <span>ÃÂ°ÃÂÃÂÃÂ° $${(m.vol/1000).toFixed(0)}k vol</span>
+          <span>Ã°ÃÂÃÂÃÂ ${m.date}</span>
+          <span>Ã°ÃÂÃÂÃ° $${(m.vol/1000).toFixed(0)}k vol</span>
           <span>${dayLabel}</span>
         </div>
       </div>
@@ -790,7 +790,7 @@ async function analyzeTop() {
       const samples=keys.map(k=>loc.daily[k][0]).filter(v=>v!==null);
       const mean=samples.reduce((a,v)=>a+v,0)/samples.length;
       const std=Math.sqrt(samples.map(v=>(v-mean)**2).reduce((a,v)=>a+v,0)/samples.length);
-      return `${cities[i]}: ${mean.toFixed(1)}ÃÂÃÂ°F ÃÂÃÂ±${std.toFixed(1)}`;
+      return `${cities[i]}: ${mean.toFixed(1)}ÃÂÃ°F ÃÂÃÂ±${std.toFixed(1)}`;
     });
     document.getElementById('stat-edge').textContent = '3';
     document.getElementById('stat-live').textContent = '2';
@@ -817,7 +817,7 @@ function saveConfig() {
 // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ TRADERS ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
 async function loadTraders() {
   const list = document.getElementById('traders-list');
-  list.innerHTML = '<div class="empty" style="padding:48px"><div style="font-size:32px;margin-bottom:8px">ÃÂ°ÃÂÃÂÃÂ¥</div>Loading top weather traders...</div>';
+  list.innerHTML = '<div class="empty" style="padding:48px"><div style="font-size:32px;margin-bottom:8px">Ã°ÃÂÃÂÃÂ¥</div>Loading top weather traders...</div>';
   try {
     const r = await fetch('https://data-api.polymarket.com/leaderboard?window=monthly&limit=20');
     const data = await r.json();
@@ -840,24 +840,24 @@ async function loadTraders() {
 // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ FORECAST MAP ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
 function renderMap() {
   const cities = [
-    {name:'Chicago',x:220,y:165,temp:'62ÃÂÃÂ°F',gfs:'61.9'},
-    {name:'Miami',x:230,y:220,temp:'75ÃÂÃÂ°F',gfs:'74.3'},
-    {name:'Dallas',x:195,y:195,temp:'94ÃÂÃÂ°F',gfs:'88.1'},
-    {name:'Seattle',x:145,y:148,temp:'56ÃÂÃÂ°F',gfs:'53.7'},
-    {name:'Atlanta',x:225,y:200,temp:'74ÃÂÃÂ°F',gfs:'72.6'},
-    {name:'London',x:430,y:140,temp:'15ÃÂÃÂ°C',gfs:'14.0'},
-    {name:'Paris',x:445,y:148,temp:'14ÃÂÃÂ°C',gfs:'13.5'},
-    {name:'Oslo',x:460,y:128,temp:'8ÃÂÃÂ°C',gfs:'7.8'},
-    {name:'Tokyo',x:745,y:165,temp:'17ÃÂÃÂ°C',gfs:'16.2'},
+    {name:'Chicago',x:220,y:165,temp:'62ÃÂÃ°F',gfs:'61.9'},
+    {name:'Miami',x:230,y:220,temp:'75ÃÂÃ°F',gfs:'74.3'},
+    {name:'Dallas',x:195,y:195,temp:'94ÃÂÃ°F',gfs:'88.1'},
+    {name:'Seattle',x:145,y:148,temp:'56ÃÂÃ°F',gfs:'53.7'},
+    {name:'Atlanta',x:225,y:200,temp:'74ÃÂÃ°F',gfs:'72.6'},
+    {name:'London',x:430,y:140,temp:'15ÃÂÃ°C',gfs:'14.0'},
+    {name:'Paris',x:445,y:148,temp:'14ÃÂÃ°C',gfs:'13.5'},
+    {name:'Oslo',x:460,y:128,temp:'8ÃÂÃ°C',gfs:'7.8'},
+    {name:'Tokyo',x:745,y:165,temp:'17ÃÂÃ°C',gfs:'16.2'},
   ];
   const dots = document.getElementById('map-dots');
   dots.innerHTML = cities.map(c=>`
-    <div style="position:absolute;left:${c.x/900*100}%;top:${c.y/460*100}%;transform:translate(-50%,-50%);text-align:center;cursor:pointer" title="${c.name}: NWS ${c.temp} / GFS ${c.gfs}ÃÂÃÂ°">
+    <div style="position:absolute;left:${c.x/900*100}%;top:${c.y/460*100}%;transform:translate(-50%,-50%);text-align:center;cursor:pointer" title="${c.name}: NWS ${c.temp} / GFS ${c.gfs}ÃÂÃ°">
       <div style="width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid rgba(59,130,246,.4);margin:0 auto 2px;animation:pulse 2s infinite"></div>
       <div style="font-family:var(--mono);font-size:9px;color:var(--text2);white-space:nowrap;background:rgba(11,15,25,.7);padding:1px 4px;border-radius:3px">${c.name}</div>
     </div>`).join('');
   const legend = document.getElementById('map-legend');
-  legend.innerHTML = cities.map(c=>`<span style="color:var(--text2)">ÃÂ°ÃÂÃÂÃÂ <b style="color:var(--blue)">${c.name}</b> GFS:${c.gfs} NWS:${c.temp}</span>`).join('');
+  legend.innerHTML = cities.map(c=>`<span style="color:var(--text2)">Ã°ÃÂÃÂÃÂ <b style="color:var(--blue)">${c.name}</b> GFS:${c.gfs} NWS:${c.temp}</span>`).join('');
 }
 
 // Init
@@ -896,7 +896,7 @@ async function fetchLiveData() {
       document.body.appendChild(badge);
     }
     const t = stats.last_scan ? new Date(stats.last_scan).toLocaleTimeString() : 'waiting...';
-    badge.textContent = 'Ã°ÂÂÂ¢ LIVE ÃÂ· ' + stats.bot_mode + ' ÃÂ· Last scan: ' + t;
+    badge.textContent = 'Ã°ÂÂÂ¢ LIVE Ã· ' + stats.bot_mode + ' Ã· Last scan: ' + t;
     badge.style.background = '#22c55e';
   } catch(e) {
     let badge = document.getElementById('live-badge');
