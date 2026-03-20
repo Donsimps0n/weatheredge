@@ -806,13 +806,20 @@ async function analyzeTop() {
 
 // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ CONFIG SAVE ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
 function saveConfig() {
-  state.config.bankroll = parseFloat(document.getElementById('cfg-bankroll').value)||86;
-  state.config.max = parseFloat(document.getElementById('cfg-max').value)||10;
-  state.config.edge = parseFloat(document.getElementById('cfg-edge').value)||8;
-  state.config.kelly = parseFloat(document.getElementById('cfg-kelly').value)||0.25;
-  state.config.interval = parseInt(document.getElementById('cfg-interval').value)||300;
-  addLog('Config saved ÃÂ¢ÃÂÃÂ bankroll $'+state.config.bankroll+' max $'+state.config.max+'/trade', 'info');
-}
+    const config = {
+      bankroll: document.getElementById('cfg-bankroll')?.value,
+      maxTrade: document.getElementById('cfg-max')?.value,
+      minEdge: document.getElementById('cfg-edge')?.value,
+      kellyFraction: document.getElementById('cfg-kelly')?.value,
+      scanInterval: document.getElementById('cfg-interval')?.value,
+      wallet: document.getElementById('cfg-wallet')?.value,
+      mode: document.getElementById('cfg-mode')?.value
+    };
+    localStorage.setItem('weatheredge_config', JSON.stringify(config));
+    addLog('Configuration saved', 'success');
+    const btn = document.querySelector('[onclick*="saveConfig"]');
+    if (btn) { const o=btn.innerHTML; btn.innerHTML='&#10003; Saved!'; btn.style.cssText='background:#00ff88;color:#000'; setTimeout(()=>{btn.innerHTML=o;btn.style.cssText='';},2000); }
+  }
 
 // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ TRADERS ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
 async function loadTraders() {
@@ -907,5 +914,7 @@ async function fetchLiveData() {
 }
 document.addEventListener('DOMContentLoaded', ()=>{ fetchLiveData(); setInterval(fetchLiveData, 30000); });
 </script>
-</body>
+<script>
+(function(){try{const s=localStorage.getItem('weatheredge_config');if(!s)return;const c=JSON.parse(s);const se=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null)e.value=v;};se('cfg-bankroll',c.bankroll);se('cfg-max',c.maxTrade);se('cfg-edge',c.minEdge);se('cfg-kelly',c.kellyFraction);se('cfg-interval',c.scanInterval);se('cfg-wallet',c.wallet);se('cfg-mode',c.mode);}catch(e){}})();
+</script></body>
 </html>
