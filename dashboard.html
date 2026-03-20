@@ -51,194 +51,37 @@
 });</script><script>(function(){try{const s=localStorage.getItem('weatheredge_config');if(!s)return;const c=JSON.parse(s);const se=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null)e.value=v;};se('cfg-bankroll',c.bankroll);se('cfg-max',c.maxTrade);se('cfg-edge',c.minEdge);se('cfg-kelly',c.kellyFraction);se('cfg-interval',c.scanInterval);se('cfg-wallet',c.wallet);se('cfg-mode',c.mode);}catch(e){}})();</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
-var _mapWorldData = null;
-
-function refreshRainMap() {
-  var RAILWAY = 'https://weatheredge-production.up.railway.app';
-  var cities = [
-    {name:'New York',lat:40.71,lon:-74.01},{name:'London',lat:51.51,lon:-0.13},
-    {name:'Tokyo',lat:35.68,lon:139.69},{name:'Paris',lat:48.85,lon:2.35},
-    {name:'Dubai',lat:25.20,lon:55.27},{name:'Seoul',lat:37.57,lon:126.98},
-    {name:'Sydney',lat:-33.87,lon:151.21},{name:'Chicago',lat:41.88,lon:-87.63},
-    {name:'Miami',lat:25.77,lon:-80.19},{name:'Atlanta',lat:33.75,lon:-84.39},
-    {name:'Berlin',lat:52.52,lon:13.41},{name:'Singapore',lat:1.35,lon:103.82},
-    {name:'Hong Kong',lat:22.32,lon:114.17},{name:'Mumbai',lat:19.08,lon:72.88},
-    {name:'Moscow',lat:55.75,lon:37.62},{name:'Mexico City',lat:19.43,lon:-99.13},
-    {name:'Sao Paulo',lat:-23.55,lon:-46.63},{name:'Johannesburg',lat:-26.20,lon:28.04},
-    {name:'Bangkok',lat:13.75,lon:100.52},{name:'Beijing',lat:39.91,lon:116.39},
-    {name:'Shanghai',lat:31.23,lon:121.47},{name:'Istanbul',lat:41.01,lon:28.95},
-    {name:'Lagos',lat:6.52,lon:3.38},{name:'Cairo',lat:30.06,lon:31.25},
-    {name:'Toronto',lat:43.65,lon:-79.38},{name:'Los Angeles',lat:34.05,lon:-118.24},
-    {name:'Seattle',lat:47.61,lon:-122.33},{name:'London',lat:51.51,lon:-0.13}
-  ];
-  // dedupe
-  var seen = {}; cities = cities.filter(function(c){if(seen[c.name])return false;seen[c.name]=true;return true;});
-
-  var container = document.getElementById('rainmap-container');
-  var canvas = document.getElementById('world-canvas');
-  var dotsEl = document.getElementById('city-dots');
-  var loadingEl = document.getElementById('map-loading');
-  var progressEl = document.getElementById('map-progress');
-  var statusEl = document.getElementById('map-status');
-  if(!canvas) return;
-
-  // Set canvas resolution
-  var W = container.offsetWidth || 1200, H = container.offsetHeight || 500;
-  canvas.width = W * window.devicePixelRatio;
-  canvas.height = H * window.devicePixelRatio;
-  canvas.style.width = W + 'px';
-  canvas.style.height = H + 'px';
-    var ctx = canvas.getContext('2d');
-  var dpr = window.devicePixelRatio;
-  ctx.scale(dpr, dpr);
-
-  dotsEl.innerHTML = '';
-  dotsEl.style.pointerEvents = 'auto';
-  if(loadingEl) loadingEl.style.display = 'flex';
-  if(progressEl) progressEl.style.width = '10%';
-
-  function drawMap(world) {
-    // D3 equirectangular projection
-    var proj = d3.geoEquirectangular()
-      .scale(W / (2 * Math.PI))
-      .translate([W/2, H/2])
-      .precision(0.1);
-    var path = d3.geoPath().projection(proj).context(ctx);
-
-    // Ocean background
-    ctx.fillStyle = '#0a1628';
-    ctx.fillRect(0, 0, W, H);
-
-    // Graticule (grid lines)
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-    ctx.lineWidth = 0.5;
-    path(d3.geoGraticule()());
-    ctx.stroke();
-
-    // Equator
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
-    ctx.lineWidth = 0.8;
-    ctx.setLineDash([4,8]);
-    path({type:'LineString',coordinates:[[-180,0],[180,0]]});
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Countries fill
-    ctx.beginPath();
-    ctx.fillStyle = '#1e3050';
-    ctx.strokeStyle = '#2d4a70';
-    ctx.lineWidth = 0.4;
-    world.features.forEach(function(f){ ctx.beginPath(); path(f); ctx.fill(); ctx.stroke(); });
-
-    if(progressEl) progressEl.style.width = '40%';
+// Bulletproof nav patch
+(function() {
+  function doSwitchTab(tab) {
+    document.querySelectorAll(".tab-panel").forEach(function(p){ p.style.display="none"; });
+    document.querySelectorAll(".nav-item").forEach(function(n){ n.classList.remove("active"); });
+    var panel = document.getElementById("tab-"+tab);
+    if (panel) panel.style.display = "block";
+    var nav = document.querySelector("[onclick*='"+tab+"']");
+    if (nav) nav.classList.add("active");
+    // Fix orphaned source-grid into tab-sources
+    var sg = document.querySelector(".source-grid");
+    var ts = document.getElementById("tab-sources");
+    if (sg && ts && !ts.contains(sg)) {
+      var wrap = sg.parentElement;
+      if (wrap && wrap !== ts) ts.appendChild(wrap);
+    }
+    if (tab === "traders" && window.weLoadTraders) setTimeout(window.weLoadTraders, 200);
   }
-
-  function tempColor(c) {
-    if(c < 0)  return '#818cf8';
-    if(c < 5)  return '#3b82f6';
-    if(c < 10) return '#06b6d4';
-    if(c < 15) return '#22d3ee';
-    if(c < 20) return '#00ff88';
-    if(c < 25) return '#84cc16';
-    if(c < 30) return '#f59e0b';
-    if(c < 35) return '#f97316';
-    return '#ef4444';
-  }
-
-  function lonLatToXY(lon, lat) {
-    // Simple equirectangular: same as d3.geoEquirectangular with our scale
-    var proj = d3.geoEquirectangular()
-      .scale(W / (2 * Math.PI))
-      .translate([W/2, H/2]);
-    return proj([lon, lat]);
-  }
-
-  function loadCities() {
-    var loaded = 0;
-    var total = cities.length;
-    cities.forEach(function(city) {
-      fetch(RAILWAY + '/api/forecast/' + encodeURIComponent(city.name))
-        .then(function(r){return r.json();})
-        .then(function(data) {
-          loaded++;
-          var tempC = parseFloat(data.mean_c);
-          if(isNaN(tempC)) tempC = null;
-          var color = tempC !== null ? tempColor(tempC) : '#4a5568';
-          var xy = lonLatToXY(city.lon, city.lat);
-          if(!xy) { if(loaded===total){done();} return; }
-          var x = xy[0], y = xy[1];
-          if(x < 0 || x > W || y < 0 || y > H) { if(loaded===total){done();} return; }
-
-          var dot = document.createElement('div');
-          dot.style.cssText = 'position:absolute;left:'+x+'px;top:'+y+'px;transform:translate(-50%,-50%);z-index:20;cursor:pointer';
-          var tempLabel = tempC !== null ? Math.round(tempC)+'&deg;' : '?';
-          dot.innerHTML = '<div style="position:relative;display:flex;flex-direction:column;align-items:center">'
-            + '<div class="md" style="width:12px;height:12px;border-radius:50%;background:'+color+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 8px '+color+'cc,0 0 16px '+color+'44;transition:all 0.15s"></div>'
-            + '<div style="background:rgba(0,0,0,0.85);color:'+color+';font-size:9px;font-family:monospace;padding:1px 3px;border-radius:2px;white-space:nowrap;margin-top:2px;pointer-events:none">'+tempLabel+'</div>'
-            + '</div>';
-
-          dot.addEventListener('mouseenter', function(e){
-            dot.querySelector('.md').style.transform = 'scale(1.9)';
-            dot.querySelector('.md').style.boxShadow = '0 0 14px '+color+',0 0 28px '+color+'88';
-            var tt = document.getElementById('map-tooltip');
-            var spread = data.model_spread || data.std_c || '?';
-            var spreadNum = parseFloat(spread);
-            var confColor = spreadNum < 1.5 ? '#00ff88' : spreadNum < 3 ? '#f59e0b' : '#ef4444';
-            var confText = spreadNum < 1.5 ? 'High' : spreadNum < 3 ? 'Medium' : 'Low';
-            document.getElementById('tt-city').textContent = city.name;
-            document.getElementById('tt-temp').innerHTML = tempC !== null ? Math.round(tempC)+'&deg;C' : 'N/A';
-            document.getElementById('tt-temp').style.color = color;
-            document.getElementById('tt-models').innerHTML = 'GFS &middot; ECMWF('+data.n_ecmwf+') &middot; UKMO &middot; MF &nbsp; &plusmn;'+spreadNum.toFixed(1)+'&deg;C spread';
-            document.getElementById('tt-conf').innerHTML = '<span style="color:'+confColor+'">&bull;</span> '+confText+' confidence';
-            var rect = container.getBoundingClientRect();
-            var tx = e.clientX - rect.left + 14;
-            var ty = e.clientY - rect.top - 14;
-            if(tx + 180 > W) tx = e.clientX - rect.left - 185;
-            if(ty + 110 > H) ty = e.clientY - rect.top - 115;
-            tt.style.left = tx + 'px';
-            tt.style.top = ty + 'px';
-            tt.style.display = 'block';
-          });
-          dot.addEventListener('mouseleave', function(){
-            dot.querySelector('.md').style.transform = 'scale(1)';
-            dot.querySelector('.md').style.boxShadow = '0 0 8px '+color+'cc,0 0 16px '+color+'44';
-            document.getElementById('map-tooltip').style.display = 'none';
-          });
-          dotsEl.appendChild(dot);
-
-          if(progressEl) progressEl.style.width = (40 + (loaded/total)*55)+'%';
-          if(loaded === total) done();
-        }).catch(function(){
-          loaded++;
-          if(loaded === total) done();
-        });
+  window.doSwitchTab = doSwitchTab;
+  window.switchTab = doSwitchTab;
+  setTimeout(function() {
+    document.querySelectorAll("[onclick]").forEach(function(el) {
+      var oc = el.getAttribute("onclick") || "";
+      if (oc.includes("switchTab")) {
+        el.onclick = function() {
+          var m = oc.match(/switchTab\(['"]([^'"]+)['"]/);
+          if (m) doSwitchTab(m[1]);
+        };
+      }
     });
-  }
-
-  function done() {
-    if(loadingEl) loadingEl.style.display = 'none';
-    if(statusEl) statusEl.textContent = cities.length + ' cities � live';
-  }
-
-  // Load world GeoJSON from CDN
-  if(_mapWorldData) {
-    drawMap(_mapWorldData);
-    loadCities();
-  } else {
-    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
-      .then(function(r){return r.json();})
-      .then(function(world){
-        _mapWorldData = topojson.feature(world, world.objects.countries);
-        drawMap(_mapWorldData);
-        loadCities();
-      }).catch(function(err){
-        console.error('Map load failed:', err);
-        if(loadingEl) loadingEl.innerHTML = '<div style="color:#ef4444;font-family:monospace;font-size:12px">Failed to load map</div>';
-      });
-  }
-}
+    doSwitchTab("dashboard");
+  }, 100);
+})();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
-
