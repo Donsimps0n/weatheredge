@@ -20,9 +20,7 @@
       <button id="map-refresh-btn" onclick="refreshRainMap()" style="background:#00ff88;color:#000;font-family:monospace;font-size:12px;font-weight:700;border:none;border-radius:6px;padding:8px 16px;cursor:pointer">&#8635; Refresh</button>
     </div>
   </div>
-  <div id="rainmap-container" style="position:relative;width:100%;height:510px;background:#060d18;border-radius:8px;overflow:hidden">
-    <canvas id="world-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
-    <div id="city-dots" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></div>
+  
     <div id="map-tooltip" style="position:absolute;display:none;background:rgba(8,12,20,0.97);border:1px solid rgba(0,255,136,0.35);border-radius:8px;padding:12px 16px;font-family:monospace;font-size:12px;color:#e8edf2;pointer-events:none;z-index:100;min-width:170px;box-shadow:0 4px 24px rgba(0,0,0,0.5)">
       <div id="tt-city" style="font-weight:700;color:#00ff88;margin-bottom:6px;font-size:13px"></div>
       <div id="tt-temp" style="font-size:26px;font-weight:700;line-height:1;margin-bottom:4px"></div>
@@ -39,7 +37,7 @@
       <span id="map-status" style="font-family:monospace;font-size:10px;color:#4a5568;margin-left:8px;border-left:1px solid rgba(255,255,255,0.08);padding-left:8px">Loading...</span>
     </div>
     <div id="map-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,13,24,0.75)">
-      <div style="font-family:monospace;color:#00ff88;font-size:13px;margin-bottom:8px">&#9632; Loading world map...</div>
+      
       <div style="width:200px;height:2px;background:rgba(0,255,136,0.15);border-radius:2px"><div id="map-progress" style="height:100%;background:#00ff88;border-radius:2px;width:0%;transition:width 0.3s"></div></div>
     </div>
   </div>
@@ -84,4 +82,53 @@
     doSwitchTab("dashboard");
   }, 100);
 })();
+</script>
+<script>
+window.weLoadTraders = function(){
+  var el=document.getElementById("lb-body");
+  if(!el)return;
+  el.innerHTML="<div style='text-align:center;padding:30px;color:var(--text3)'>Loading&#8230;</div>";
+  var STATIC=[{"rank":1,"trader_name":"ColdMath","trader":"0x594edb9112f526fa6a80b8f858a6379c8a2c1c11","overall_gain":78345,"win_rate":0.837,"event_ct":1116,"win_amount":103184,"loss_amount":-24839},{"rank":2,"trader_name":"Hans323","trader":"0x0f37cb80dee49d55b5f6d9e595d52591d6371410","overall_gain":80156,"win_rate":0.609,"event_ct":665,"win_amount":91477,"loss_amount":-11321},{"rank":3,"trader_name":"aenews2","trader":"0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1","overall_gain":75176,"win_rate":0.768,"event_ct":69,"win_amount":105925,"loss_amount":-30749},{"rank":4,"trader_name":"automatedAItradingbot","trader":"0xd8f8c13644ea84d62e1ec88c5d1215e436eb0f11","overall_gain":62165,"win_rate":0.35,"event_ct":634,"win_amount":73457,"loss_amount":-11291},{"rank":5,"trader_name":"Handsanitizer23","trader":"0x05e70727a2e2dcd079baa2ef1c0b88af06bb9641","overall_gain":58814,"win_rate":0.522,"event_ct":23,"win_amount":75087,"loss_amount":-16273},{"rank":6,"trader_name":"Poligarch","trader":"0xb40e89672a7cc9","overall_gain":74146,"win_rate":1.0,"event_ct":200,"win_amount":74146,"loss_amount":0},{"rank":7,"trader_name":"CoffeeLover","trader":"0xc1b399b26020a4f689108e9640fd3dc8ffc8501c","overall_gain":51516,"win_rate":0.889,"event_ct":19,"win_amount":51902,"loss_amount":-386},{"rank":8,"trader_name":"HondaCivic","trader":"0x15ceffed7bf820cd2d90f90ea24ae9909f5cd5fa","overall_gain":42904,"win_rate":0.908,"event_ct":199,"win_amount":56247,"loss_amount":-13343},{"rank":9,"trader_name":"NoonienSoong","trader":"0x","overall_gain":25095,"win_rate":0.963,"event_ct":50,"win_amount":25095,"loss_amount":0},{"rank":10,"trader_name":"JoeTheMeteorologist","trader":"0x","overall_gain":22131,"win_rate":0.338,"event_ct":34,"win_amount":29113,"loss_amount":-6982}];
+  function fmt(n){return(n>=0?"+$":"-$")+Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",");}
+  function card(t,i){
+    var rk=i+1,nm=t.trader_name,wa=t.trader?(t.trader.slice(0,6)+"..."+t.trader.slice(-4)):"";
+    var cl=rk===1?"":rk===2?" s2":rk===3?" s3":"";
+    var col=t.overall_gain>=0?"#00e676":"#f44336";
+    var tr=t.overall_gain>=0?"M0,45 Q100,35 200,20 Q300,10 400,2":"M0,2 Q100,10 200,22 Q300,36 400,48";
+    var gid="tg"+rk;
+    var wo="$"+Math.abs(t.win_amount||0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+    var ls="$"+Math.abs(t.loss_amount||0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+    return "<div class='tc'>"+
+      "<div class='tc-top'>"+
+      "<div class='tc-rk"+cl+"'>"+rk+"</div>"+
+      "<div style='flex:1'><div class='tc-nm'>"+nm+"</div><div class='tc-wa'>"+wa+"</div></div>"+
+      "<div style='text-align:right'><div class='tc-pn"+( t.overall_gain<0?" neg":"")+"'>"+fmt(t.overall_gain)+"</div><div class='tc-pl'>All-Time P&L</div></div>"+
+      "<a class='tc-lk' href='https://polymarket.com/profile/"+t.trader+"' target='_blank'>PM&#8599;</a>"+
+      "<a class='tc-lk' href='https://polymarketanalytics.com/traders/"+nm+"' target='_blank'>&#128202;</a>"+
+      "</div>"+
+      "<div class='tc-st'>"+
+      "<div style='text-align:center'><div class='tc-sv'>"+((t.win_rate||0)*100).toFixed(1)+"%</div><div class='tc-sl'>Win Rate</div></div>"+
+      "<div style='text-align:center;border-left:1px solid var(--border)'><div class='tc-sv'>"+(t.event_ct||0)+"</div><div class='tc-sl'>Markets</div></div>"+
+      "<div style='text-align:center;border-left:1px solid var(--border)'><div class='tc-sv' style='color:#00e676'>"+wo+"</div><div class='tc-sl'>Won</div></div>"+
+      "<div style='text-align:center;border-left:1px solid var(--border)'><div class='tc-sv' style='color:#f44336'>"+ls+"</div><div class='tc-sl'>Lost</div></div>"+
+      "</div>"+
+      "<div class='tc-sc'><svg viewBox='0 0 400 50' width='100%' height='40' preserveAspectRatio='none'>"+
+      "<defs><linearGradient id='"+gid+"' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='"+col+"' stop-opacity='0.25'/><stop offset='100%' stop-color='"+col+"' stop-opacity='0'/></linearGradient></defs>"+
+      "<path d='"+tr+" L400,50 L0,50 Z' fill='url(#"+gid+")' />"+
+      "<path d='"+tr+"' fill='none' stroke='"+col+"' stroke-width='2'/></svg></div>"+
+      "</div>";
+  }
+  fetch("https://weatheredge-production.up.railway.app/api/traders")
+    .then(function(r){return(r&&typeof r.json==="function")?r.json():r;})
+    .then(function(data){
+      var list=(data&&data.traders)?data.traders:STATIC;
+      el.innerHTML=list.slice(0,10).map(card).join("");
+    }).catch(function(){el.innerHTML=STATIC.map(card).join("");});
+};
+// Fix orphaned source-grid
+setTimeout(function(){
+  var sg=document.querySelector(".source-grid");
+  var ts=document.getElementById("tab-sources");
+  if(sg&&ts&&!ts.contains(sg)){var w=sg.parentElement;if(w&&w!==ts)ts.appendChild(w);}
+},150);
 </script>
