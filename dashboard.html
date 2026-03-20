@@ -250,15 +250,12 @@ setTimeout(function(){
     var api = 'https://weatheredge-production.up.railway.app';
 
     CITIES.forEach(function(c) {
-      var city = c[0].toLowerCase().replace(/ /g,'-');
+      var city = c[0].toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,'');
       fetch(api + '/api/forecast/' + encodeURIComponent(city))
         .then(function(r){return r.json();})
         .then(function(d){
           // temp is in forecast[0].temp_c or similar
-          var t = null;
-          if (d && d.forecast && d.forecast[0]) t = d.forecast[0].temp_max_c;
-          else if (d && d.temperature !== undefined) t = d.temperature;
-          else if (d && d.temp_c !== undefined) t = d.temp_c;
+          var t = (d && d.temp_c !== undefined) ? d.temp_c : null;
           temps[c[0]] = t;
         })
         .catch(function(){temps[c[0]]=null;})
