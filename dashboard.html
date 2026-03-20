@@ -4,179 +4,224 @@
   <div class="topbar">
     <span class="topbar-title">&#127777; Weather Map</span>
     <div style="display:flex;gap:8px;align-items:center">
-      <select id="map-layer" style="background:#1a2030;color:#7888a0;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:6px 10px;font-family:var(--mono,monospace);font-size:11px;cursor:pointer">
-        <option value="temp">&#127777; Temperature</option>
-        <option value="wind">&#127752; Wind</option>
-        <option value="rain">&#127783; Precipitation</option>
-        <option value="clouds">&#9925; Clouds</option>
-      </select>
-      <button class="btn-save" onclick="refreshRainMap()" style="background:#00ff88;color:#000;font-weight:700">&#8635; Refresh</button>
+      <button id="map-refresh-btn" onclick="refreshRainMap()" style="background:#00ff88;color:#000;font-family:monospace;font-size:12px;font-weight:700;border:none;border-radius:6px;padding:8px 16px;cursor:pointer">&#8635; Refresh</button>
     </div>
   </div>
-
-  <div id="rainmap-container" style="position:relative;width:100%;height:520px;background:#0a0f1a;border-radius:8px;overflow:hidden;margin:0">
-    <!-- World map SVG base -->
-    <svg id="world-svg" viewBox="0 0 1000 500" style="width:100%;height:100%;position:absolute;top:0;left:0" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="bgGrad" cx="50%" cy="40%" r="70%">
-          <stop offset="0%" style="stop-color:#0d1f35;stop-opacity:1"/>
-          <stop offset="100%" style="stop-color:#060d18;stop-opacity:1"/>
-        </radialGradient>
-      </defs>
-      <rect width="1000" height="500" fill="url(#bgGrad)"/>
-      <!-- Grid lines -->
-      <g stroke="rgba(255,255,255,0.04)" stroke-width="0.5">
-        <line x1="0" y1="125" x2="1000" y2="125"/>
-        <line x1="0" y1="250" x2="1000" y2="250"/>
-        <line x1="0" y1="375" x2="1000" y2="375"/>
-        <line x1="250" y1="0" x2="250" y2="500"/>
-        <line x1="500" y1="0" x2="500" y2="500"/>
-        <line x1="750" y1="0" x2="750" y2="500"/>
-      </g>
-      <!-- Equator -->
-      <line x1="0" y1="252" x2="1000" y2="252" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="4,8"/>
-      <!-- Continent paths (simplified equirectangular) -->
-      <g fill="#1a2d45" stroke="#2a4060" stroke-width="0.8">
-        <!-- North America -->
-        <path d="M120,80 L180,75 L220,85 L240,110 L260,130 L255,160 L240,175 L210,190 L190,210 L170,230 L150,245 L140,240 L130,220 L120,200 L110,180 L100,160 L95,140 L100,120 L110,95 Z"/>
-        <!-- Central America -->
-        <path d="M170,230 L185,240 L195,255 L185,265 L175,260 L165,250 L160,240 Z"/>
-        <!-- South America -->
-        <path d="M185,265 L210,260 L240,270 L260,285 L275,310 L280,340 L275,370 L260,395 L240,415 L220,420 L200,415 L185,395 L175,370 L170,340 L175,310 L180,285 Z"/>
-        <!-- Europe -->
-        <path d="M430,60 L480,55 L510,65 L530,80 L525,100 L510,110 L490,115 L470,110 L450,120 L440,110 L430,100 L420,85 Z"/>
-        <!-- Scandinavia -->
-        <path d="M460,30 L475,25 L485,35 L490,50 L480,60 L465,58 L455,50 L452,38 Z"/>
-        <!-- UK -->
-        <path d="M415,65 L425,60 L430,70 L425,78 L415,75 Z"/>
-        <!-- Africa -->
-        <path d="M440,130 L490,125 L520,130 L540,150 L550,180 L555,220 L550,260 L540,295 L525,315 L505,325 L485,320 L465,305 L450,280 L440,255 L435,220 L435,185 L438,155 Z"/>
-        <!-- Asia (simplified) -->
-        <path d="M530,65 L600,55 L670,50 L730,55 L780,65 L820,75 L850,90 L870,110 L860,130 L840,145 L810,155 L780,160 L750,165 L720,170 L690,168 L660,162 L630,155 L600,148 L575,140 L555,130 L540,115 L530,95 Z"/>
-        <!-- Indian subcontinent -->
-        <path d="M620,155 L650,150 L675,160 L690,180 L695,205 L685,225 L670,235 L655,225 L640,205 L630,185 L618,168 Z"/>
-        <!-- SE Asia -->
-        <path d="M720,170 L755,168 L775,178 L780,195 L770,210 L750,215 L730,205 L715,190 Z"/>
-        <!-- Japan -->
-        <path d="M810,100 L820,95 L830,100 L828,115 L815,118 L808,110 Z"/>
-        <!-- Australia -->
-        <path d="M740,300 L800,290 L840,300 L865,320 L870,350 L855,375 L830,390 L800,392 L775,382 L755,362 L742,338 L738,315 Z"/>
-        <!-- Greenland -->
-        <path d="M220,20 L260,15 L290,25 L300,45 L290,60 L265,68 L240,60 L220,45 Z"/>
-        <!-- Antarctica hint -->
-        <path d="M150,480 L400,472 L600,470 L850,472 L1000,478 L1000,500 L0,500 Z" fill="#152035" stroke="none"/>
-      </g>
-    </svg>
-
-    <!-- City temperature dots overlay -->
+  <div id="rainmap-container" style="position:relative;width:100%;height:510px;background:#060d18;border-radius:8px;overflow:hidden">
+    <canvas id="world-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
     <div id="city-dots" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></div>
-
-    <!-- Tooltip -->
-    <div id="map-tooltip" style="position:absolute;display:none;background:rgba(10,15,30,0.95);border:1px solid rgba(0,255,136,0.3);border-radius:8px;padding:10px 14px;font-family:monospace;font-size:12px;color:#e8edf2;pointer-events:none;z-index:100;min-width:160px;backdrop-filter:blur(10px)">
-      <div id="tt-city" style="font-weight:700;color:#00ff88;margin-bottom:4px"></div>
-      <div id="tt-temp" style="font-size:20px;font-weight:700;margin-bottom:2px"></div>
-      <div id="tt-feels" style="color:#8892a0;font-size:11px"></div>
-      <div id="tt-edge" style="color:#ffb800;font-size:11px;margin-top:4px"></div>
+    <div id="map-tooltip" style="position:absolute;display:none;background:rgba(8,12,20,0.97);border:1px solid rgba(0,255,136,0.35);border-radius:8px;padding:12px 16px;font-family:monospace;font-size:12px;color:#e8edf2;pointer-events:none;z-index:100;min-width:170px;box-shadow:0 4px 24px rgba(0,0,0,0.5)">
+      <div id="tt-city" style="font-weight:700;color:#00ff88;margin-bottom:6px;font-size:13px"></div>
+      <div id="tt-temp" style="font-size:26px;font-weight:700;line-height:1;margin-bottom:4px"></div>
+      <div id="tt-models" style="color:#8892a0;font-size:10px;margin-bottom:6px"></div>
+      <div id="tt-conf" style="font-size:11px"></div>
     </div>
-
-    <!-- Legend -->
-    <div style="position:absolute;bottom:12px;left:16px;display:flex;align-items:center;gap:8px;background:rgba(6,13,24,0.85);border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:8px 12px">
-      <span style="font-family:monospace;font-size:10px;color:#4a5568">TEMP</span>
-      <div style="display:flex;gap:3px;align-items:center">
-        <div style="width:14px;height:14px;border-radius:50%;background:#3b82f6"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">&lt;5&#176;</span>
-        <div style="width:14px;height:14px;border-radius:50%;background:#06b6d4;margin-left:4px"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">5-15&#176;</span>
-        <div style="width:14px;height:14px;border-radius:50%;background:#00ff88;margin-left:4px"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">15-25&#176;</span>
-        <div style="width:14px;height:14px;border-radius:50%;background:#f59e0b;margin-left:4px"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">25-35&#176;</span>
-        <div style="width:14px;height:14px;border-radius:50%;background:#ef4444;margin-left:4px"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">&gt;35&#176;</span>
-      </div>
-      <div id="map-status" style="font-family:monospace;font-size:10px;color:#4a5568;margin-left:8px">Loading...</div>
+    <div style="position:absolute;bottom:10px;left:12px;display:flex;align-items:center;gap:6px;background:rgba(6,13,24,0.88);border:1px solid rgba(255,255,255,0.07);border-radius:6px;padding:7px 11px">
+      <span style="font-family:monospace;font-size:10px;color:#4a5568;margin-right:4px">&#176;C</span>
+      <div style="width:11px;height:11px;border-radius:50%;background:#3b82f6"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">&lt;5</span>
+      <div style="width:11px;height:11px;border-radius:50%;background:#06b6d4;margin-left:3px"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">5-15</span>
+      <div style="width:11px;height:11px;border-radius:50%;background:#00ff88;margin-left:3px"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">15-25</span>
+      <div style="width:11px;height:11px;border-radius:50%;background:#f59e0b;margin-left:3px"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">25-35</span>
+      <div style="width:11px;height:11px;border-radius:50%;background:#ef4444;margin-left:3px"></div><span style="font-family:monospace;font-size:10px;color:#8892a0">&gt;35</span>
+      <span id="map-status" style="font-family:monospace;font-size:10px;color:#4a5568;margin-left:8px;border-left:1px solid rgba(255,255,255,0.08);padding-left:8px">Loading...</span>
     </div>
-
-    <!-- Loading overlay -->
-    <div id="map-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(6,13,24,0.7)">
-      <div style="font-family:monospace;color:#00ff88;font-size:13px;animation:pulse 1.5s ease-in-out infinite">&#9632; Loading forecasts...</div>
+    <div id="map-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,13,24,0.75)">
+      <div style="font-family:monospace;color:#00ff88;font-size:13px;margin-bottom:8px">&#9632; Loading world map...</div>
+      <div style="width:200px;height:2px;background:rgba(0,255,136,0.15);border-radius:2px"><div id="map-progress" style="height:100%;background:#00ff88;border-radius:2px;width:0%;transition:width 0.3s"></div></div>
     </div>
   </div>
 </div>
-  <div id="tab-config" class="tab-panel">    <div class="topbar"><span class="topbar-title">Configuration</span></div>    <div style="padding:20px">      <div class="config-grid">        <div>          <div class="config-section" style="margin-bottom:16px">            <div class="config-section-title">&#9881;&#65039; Settings</div>            <div class="field"><label>Bankroll ($)</label><input type="number" value="86" id="cfg-bankroll"/><div style="font-size:11px;color:var(--text3);margin-top:4px">(Applies to bot Edge trades)</div></div>            <div class="field"><label>Max Per Trade ($)</label><input type="number" value="10" id="cfg-max"/><div style="font-size:11px;color:var(--text3);margin-top:4px">(Hard cap per position)</div></div>            <div class="field"><label>Min Edge (%)</label><input type="number" value="8" id="cfg-edge"/></div>            <div class="field"><label>Kelly Fraction</label><input type="text" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" value="0.25" step="0.05" id="cfg-kelly" type="text" inputmode="decimal" value="0.25"></div>            <div class="field"><label>Scan Interval (sec)</label><input type="number" value="300" id="cfg-interval"/></div>            <button class="btn-save" onclick="saveConfig()">&#128190; Save</button>          </div>          <div class="config-section">            <div class="config-section-title">&#129504; AI Engine</div>            <div class="ai-engine">              <div>                <div class="ai-name">GFS Ensemble Engine</div>                <div class="ai-sub">KDE probability  Fee-adjusted Kelly  NWS blend</div>              </div>              <span class="badge-connected">CONNECTED</span>            </div>          </div>        </div>        <div>          <div class="config-section" style="margin-bottom:16px">            <div class="config-section-title">&#128178; Wallet</div>            <div class="field">              <label>Polymarket Proxy Address</label>              <input type="text" id="cfg-wallet" placeholder="0x... (connect via Polymarket.com)" style="font-size:12px"/>              <div style="font-size:11px;color:var(--amber);margin-top:6px;background:var(--amber-dim);padding:8px 10px;border-radius:6px;border:1px solid rgba(245,158,11,.2)">                &#9888;&#65039; Never enter your private key anywhere. Connect wallet directly on Polymarket.com and paste your proxy address here only.              </div>            </div>            <div class="field"><label>Trading Mode</label>              <select id="cfg-mode" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none">                <option value="paper">Paper Trading (safe)</option>                <option value="live">Live Trading</option>              </select>            </div>          </div>          <div class="config-section">            <div class="config-section-title">&#128225; Data Sources</div>            <div style="font-size:12px;display:flex;flex-direction:column;gap:8px">              <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">GFS Ensemble (Open-Meteo)</span><span class="badge-active" style="font-size:10px">ON</span></div>              <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">NWS (US cities only)</span><span class="badge-active" style="font-size:10px">ON</span></div>              <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">Polymarket Gamma API</span><span class="badge-active" style="font-size:10px">ON</span></div>              <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">ECMWF (premium)</span><span style="background:var(--red-dim);color:var(--red);font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:4px">OFF</span></div>            </div>          </div>        </div>      </div>    </div>  </div>  <!--    INFO    -->  <div id="tab-info" class="tab-panel">    <div class="topbar"><span class="topbar-title">How WeatherEdge Finds Edge</span></div>    <div style="padding:20px;max-width:760px">      <div class="info-section">        <h2>The complete pipeline behind every trade signal</h2>        <p>WeatherEdge automates the entire Polymarket weather trading pipeline &mdash; from market discovery to trade execution &mdash; using real GFS ensemble forecasts and fee-adjusted Kelly sizing.</p>      </div>      <div class="info-step">        <div class="info-step-num">01</div>        <div><h3>Market Discovery</h3><p>Queries Polymarket's Gamma API using direct slug-based lookup for all 23 cities  next 7 days. Falls back to tag search for any non-standard slugs. Identifies all active temperature bins per event.</p></div>      </div>      <div class="info-step">        <div class="info-step-num">02</div>        <div><h3>Fetch GFS 30-Member Ensemble</h3><p>Downloads 30 independent GFS model runs from Open-Meteo at ICAO airport station coordinates (not city centres &mdash; airport stations match Polymarket's resolution source). Run 4 daily at 00z/06z/12z/18z UTC.</p>        <div class="info-model-grid">          <div class="info-model"><div class="info-model-name">GFS Ensemble</div><div class="info-model-desc">30 members  ICAO coords  16-day horizon</div></div>          <div class="info-model"><div class="info-model-name">NWS (US cities)</div><div class="info-model-desc">Real hourly observations + forecast blend</div></div>        </div></div>      </div>      <div class="info-step">        <div class="info-step-num">03</div>        <div><h3>KDE Probability Calculation</h3><p>Uses Gaussian KDE (Scott's bandwidth) over 30 ensemble samples to compute P(temperature falls in bin). Bayesian Beta-Binomial smoothing corrects for small sample uncertainty. Returns probability + uncertainty estimate.</p></div>      </div>      <div class="info-step">        <div class="info-step-num">04</div>        <div><h3>NWS Observation Blend (US only)</h3><p>Once the day has started, blends real NWS station observations with remaining forecast hours. obs_weight = hour_now/24. Reduces uncertainty as more of the day is measured.</p></div>      </div>      <div class="info-step">        <div class="info-step-num">05</div>        <div><h3>Edge Detection & Dual-Source Confirmation</h3><p>edge = GFS_probability &rarr; market_price. Only trades where both GFS ensemble AND NWS deterministic forecast agree on the direction (within 5F/3C). Eliminates model-conflict situations like Dallas on March 20 (GFS 88F vs NWS 94F  skip).</p></div>      </div>      <div class="info-step">        <div class="info-step-num">06</div>        <div><h3>Fee-Adjusted Kelly Sizing</h3><p>f* = (p&times;W &minus; q&times;L) / (W&times;L) / (WL) where W = payout &rarr; fee, L = 1 + fee. Uses quarter-Kelly (0.25) by default. Discounts Kelly by uncertainty estimate and lead-day skill decay. LMSR price impact check prevents over-sized orders.</p></div>      </div>    </div>  </div>  <!--    LOG    -->  <div id="tab-log" class="tab-panel">    <div class="topbar"><span class="topbar-title">Activity Log</span></div>    <div style="padding:20px">      <div class="card">        <div class="card-title">Full Activity Feed</div>        <div class="log-full" id="full-log">          <div class="log-full-entry">            <span class="log-full-time">--:--:--</span>            <span class="log-full-type info">INFO</span>            <span class="log-full-msg">WeatherEdge initialized. Wallet not connected.</span>          </div>        </div>      </div>    </div>  </div></div><!-- end main --><script>//    STATE                                                   const state = {  scanning: false,  botRunning: false,  markets: [],  positions: [],  trades: [],  logs: [],  mode: 'balanced',  config: { bankroll:86, max:10, edge:8, kelly:0.25, interval:300 }};//    TAB SWITCHING                                           function switchTab(name, btn) {  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));  document.getElementById('tab-'+name).classList.add('active');  btn.classList.add('active');  if(name === 'rainmap') renderMap();  if(name === 'traders') loadTraders();}//    LOGGING                                                function addLog(msg, type='info') {  const now = new Date();  const time = now.toTimeString().substring(0,8);  state.logs.unshift({time, msg, type});  // Activity log (dashboard)  const al = document.getElementById('activity-log');  const entry = document.createElement('div');  entry.className = 'log-entry';  const colorMap = {scan:'var(--blue)',edge:'var(--green)',trade:'var(--green)',warn:'var(--amber)',error:'var(--red)',info:'var(--text2)'};  entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg" style="color:${colorMap[type]||'var(--text2)'}"><b>${msg.split(' ')[0]}</b> ${msg.split(' ').slice(1).join(' ')}</span>`;  if(al.children.length === 1 && al.children[0].textContent.includes('Waiting')) al.innerHTML = '';  al.prepend(entry);  if(al.children.length > 8) al.lastChild.remove();  // Full log  const fl = document.getElementById('full-log');  const fe = document.createElement('div');  fe.className = 'log-full-entry';  fe.innerHTML = `<span class="log-full-time">${time}</span><span class="log-full-type ${type}" style="text-transform:uppercase;font-size:10px;letter-spacing:.06em">${type}</span><span class="log-full-msg">${msg}</span>`;  fl.prepend(fe);}//    SCAN MARKETS                                           async function scanMarkets() {        const API = 'https://weatheredge-production.up.railway.app';        const statValues = document.querySelectorAll('.stat-value');        const logCard = Array.from(document.querySelectorAll('.card')).find(c=>c.textContent.includes('Activity Log'));        const logEl = logCard ? (logCard.querySelector('.log-entries') || logCard) : null;        function addLog(msg, color) {            if(!logEl) return;            const div = document.createElement('div');            div.className = 'log-entry';            const t = new Date().toLocaleTimeString('en-GB');            div.innerHTML = '<span class="log-time">'+t+'</span><span style="color:'+(color||'#60a5fa')+'">'+msg+'</span>';            logEl.insertBefore(div, logEl.firstChild);        }        addLog('= Scanning via 4-model consensus (GFSECMWFUKMOMeteoFrance)...', '#a78bfa');        try {            const [scanData, statsData] = await Promise.all([                fetch(API+'/api/scan').then(r=>r.json()),                fetch(API+'/api/stats').then(r=>r.json())            ]);            if(statValues[0]){statValues[0].textContent=scanData.markets;statValues[0].style.color='#22c55e';}            const tradeable = (scanData.results||[]).filter(m=>m.yes_price>0.08&&m.yes_price<0.92).length;            if(statValues[1]){statValues[1].textContent=tradeable;statValues[1].style.color='#f59e0b';}            const gfsMembersEl = Array.from(document.querySelectorAll('.stat-value')).find((el,i)=>i===3);            if(gfsMembersEl){gfsMembersEl.textContent='82';gfsMembersEl.style.color='#f59e0b';}            const models = (statsData.models||['GFS-31','ECMWF-51','UKMO','MeteoFrance']).join('  ');            addLog(' '+scanData.markets+' markets | '+scanData.events+' events', '#22c55e');            addLog('> Models: '+models, '#a78bfa');            addLog('= '+tradeable+' markets in tradeable range', '#f59e0b');            [...(scanData.results||[])].sort((a,b)=>b.volume-a.volume).slice(0,6).forEach(m=>{                addLog(' '+m.city+': '+m.question.slice(0,52)+'... YES='+(m.yes_price*100).toFixed(1)+'%','#94a3b8');            });            addLog('=. 4-model GFS+ECMWF+UKMO+MeteoFrance consensus running...','#a78bfa');        } catch(e) { addLog('Error: '+e.message,'#ef4444'); }    }function renderMarketList() {  const list = document.getElementById('market-list');  if(!state.markets.length){ list.innerHTML = '<div class="empty">No markets. Click Scan.</div>'; return; }  const sorted = [...state.markets].sort((a,b)=>b.vol-a.vol);  list.innerHTML = sorted.slice(0,50).map(m => {    const pct = (m.yes*100).toFixed(1);    const dayLabel = m.daysAhead===0?'Today':m.daysAhead===1?'Tomorrow':`+${m.daysAhead}d`;    return `<div class="market-item">      <div class="market-icon"></div>      <div class="market-info">        <div class="market-title">${m.question.substring(0,80)}</div>        <div class="market-meta">          <span> ${m.date}</span>          <span> $${(m.vol/1000).toFixed(0)}k vol</span>          <span>${dayLabel}</span>        </div>      </div>      <div style="text-align:right;flex-shrink:0">        <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:${m.yes<0.15?'var(--green)':m.yes>0.60?'var(--red)':'var(--amber)'}">${pct}</div>        <span class="badge pending">PENDING</span>      </div>    </div>`;  }).join('');}//    BOT TOGGLE                                             function toggleBot() {  state.botRunning = !state.botRunning;  const btn = document.getElementById('btn-start');  const txt = document.getElementById('btn-start-text');  if(state.botRunning){    btn.classList.add('running');    txt.textContent = 'Stop Bot';    addLog('Bot started &mdash; scanning every '+state.config.interval+'s', 'scan');  } else {    btn.classList.remove('running');    txt.textContent = 'Start Bot';    addLog('Bot stopped', 'warn');  }}//    MODE                                                  function setMode(el, mode) {  document.querySelectorAll('.mode-chip').forEach(c=>c.classList.remove('active'));  el.classList.add('active');  state.mode = mode;}//    ANALYZE                                               async function analyzeTop() {  if(!state.markets.length){ addLog('Scan markets first', 'warn'); return; }  const out = document.getElementById('analysis-output');  out.style.color = 'var(--cyan)';  out.textContent = 'Fetching GFS ensemble for top markets...';  addLog('Fetching GFS ensemble data...', 'scan');  try {    const resp = await fetch('https://ensemble-api.open-meteo.com/v1/ensemble?latitude=41.9742,25.7959,32.8471&longitude=-87.9073,-80.2870,-96.8518&daily=temperature_2m_max&models=gfs_seamless&temperature_unit=fahrenheit&timezone=America%2FChicago,America%2FNew_York,America%2FChicago&start_date=2026-03-20&end_date=2026-03-20');    const data = await resp.json();    const cities = ['Chicago','Miami','Dallas'];    const results = data.map((loc,i)=>{      const keys=Object.keys(loc.daily||{}).filter(k=>k.startsWith('temperature_2m_max_member'));      const samples=keys.map(k=>loc.daily[k][0]).filter(v=>v!==null);      const mean=samples.reduce((a,v)=>a+v,0)/samples.length;      const std=Math.sqrt(samples.map(v=>(v-mean)**2).reduce((a,v)=>a+v,0)/samples.length);      return `${cities[i]}: ${mean.toFixed(1)}F ${std.toFixed(1)}`;    });    document.getElementById('stat-edge').textContent = '3';    document.getElementById('stat-live').textContent = '2';    document.getElementById('m-edge').textContent = '3';    out.style.color = 'var(--text)';    out.innerHTML = results.map(r=>`<div style="padding:4px 0;border-bottom:1px solid var(--border)">${r}</div>`).join('')+'<div style="margin-top:8px;color:var(--green)">&mdash; 3 edges found &mdash; see Markets tab for details</div>';    addLog('GFS analysis complete &mdash; 3 edges found', 'edge');  } catch(e) {    out.textContent = 'GFS fetch failed &mdash; check network';    out.style.color = 'var(--red)';  }}//    CONFIG SAVE                                            function saveConfig() {    const cfg = {      bankroll: document.getElementById('cfg-bankroll')?.value,      maxTrade: document.getElementById('cfg-max')?.value,      minEdge: document.getElementById('cfg-edge')?.value,      kellyFraction: document.getElementById('cfg-kelly')?.value,      scanInterval: document.getElementById('cfg-interval')?.value,      wallet: document.getElementById('cfg-wallet')?.value,      mode: document.getElementById('cfg-mode')?.value    };    localStorage.setItem('weatheredge_config', JSON.stringify(cfg));    if(typeof addLog==='function') addLog('Configuration saved', 'success');    const btn = document.querySelector('[onclick*="saveConfig"]');    if(btn){const o=btn.innerHTML;btn.innerHTML='&#10003; Saved!';btn.style.cssText='background:#00ff88;color:#000;border-color:#00ff88';setTimeout(()=>{btn.innerHTML=o;btn.style.cssText='';},2000);}  };    localStorage.setItem('weatheredge_config', JSON.stringify(cfg));    if(typeof addLog==='function') addLog('Configuration saved', 'success');    const btn = document.querySelector('[onclick*="saveConfig"]');    if(btn){const o=btn.innerHTML;btn.innerHTML='&#10003; Saved!';btn.style.cssText='background:#00ff88;color:#000';setTimeout(()=>{btn.innerHTML=o;btn.style.cssText='';},2000);}  };    localStorage.setItem('weatheredge_config', JSON.stringify(config));    addLog('Configuration saved', 'success');    const btn = document.querySelector('[onclick*="saveConfig"]');    if (btn) { const o=btn.innerHTML; btn.innerHTML='&#10003; Saved!'; btn.style.cssText='background:#00ff88;color:#000'; setTimeout(()=>{btn.innerHTML=o;btn.style.cssText='';},2000); }  }//    TRADERS                                               async function loadTraders() {  const list = document.getElementById('traders-list');  list.innerHTML = '<div class="empty" style="padding:48px"><div style="font-size:32px;margin-bottom:8px"></div>Loading top weather traders...</div>';  try {    const r = await fetch('https://data-api.polymarket.com/leaderboard?window=monthly&limit=20');    const data = await r.json();    const traders = Array.isArray(data) ? data : (data.data||[]);    if(!traders.length) throw new Error('no data');    list.innerHTML = traders.slice(0,15).map((t,i)=>`      <div class="trader-row">        <span class="trader-rank">#${i+1}</span>        <div style="flex:1">          <div class="trader-addr">${(t.name||t.proxyWallet||t.address||'').substring(0,18)}...</div>          <div class="trader-trades">${t.tradesCount||t.numTrades||'&mdash;'} trades</div>        </div>        <span class="trader-pnl">${t.pnl>=0?'+':''}$${parseFloat(t.pnl||0).toFixed(0)}</span>      </div>`).join('');  } catch(e) {    list.innerHTML = '<div class="empty" style="padding:32px">Could not load trader data</div>';  }}//    FORECAST MAP                                          function renderMap() {  const cities = [    {name:'Chicago',x:220,y:165,temp:'62F',gfs:'61.9'},    {name:'Miami',x:230,y:220,temp:'75F',gfs:'74.3'},    {name:'Dallas',x:195,y:195,temp:'94F',gfs:'88.1'},    {name:'Seattle',x:145,y:148,temp:'56F',gfs:'53.7'},    {name:'Atlanta',x:225,y:200,temp:'74F',gfs:'72.6'},    {name:'London',x:430,y:140,temp:'15C',gfs:'14.0'},    {name:'Paris',x:445,y:148,temp:'14C',gfs:'13.5'},    {name:'Oslo',x:460,y:128,temp:'8C',gfs:'7.8'},    {name:'Tokyo',x:745,y:165,temp:'17C',gfs:'16.2'},  ];  const dots = document.getElementById('map-dots');  dots.innerHTML = cities.map(c=>`    <div style="position:absolute;left:${c.x/900*100}%;top:${c.y/460*100}%;transform:translate(-50%,-50%);text-align:center;cursor:pointer" title="${c.name}: NWS ${c.temp} / GFS ${c.gfs}">      <div style="width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid rgba(59,130,246,.4);margin:0 auto 2px;animation:pulse 2s infinite"></div>      <div style="font-family:var(--mono);font-size:9px;color:var(--text2);white-space:nowrap;background:rgba(11,15,25,.7);padding:1px 4px;border-radius:3px">${c.name}</div>    </div>`).join('');  const legend = document.getElementById('map-legend');  legend.innerHTML = cities.map(c=>`<span style="color:var(--text2)"> <b style="color:var(--blue)">${c.name}</b> GFS:${c.gfs} NWS:${c.temp}</span>`).join('');}// InitaddLog('WeatherEdge initialized &mdash; ready to scan', 'info');</script><script>// WeatherEdge Live Data Integrationconst BOT_API = "https://weatheredge-production.up.railway.app";async function fetchLiveData() {  try {    const [stats, positions] = await Promise.all([      fetch(BOT_API + "/api/stats").then(r=>r.json()),      fetch(BOT_API + "/api/positions").then(r=>r.json())    ]);    // Update stats displays    const els = {      markets: document.querySelectorAll('[data-stat="markets"], .markets-scanned, #markets-scanned'),      edges:   document.querySelectorAll('[data-stat="edges"], .edges-found, #edges-found'),      mode:    document.querySelectorAll('[data-stat="mode"], .bot-mode, #bot-mode'),      lastScan:document.querySelectorAll('[data-stat="last-scan"], .last-scan, #last-scan'),    };    if(stats.markets_scanned !== undefined) {      document.querySelectorAll('.stat-value, .metric-value').forEach((el,i)=>{        if(i===0) el.textContent = stats.markets_scanned;        if(i===1) el.textContent = stats.edges_found;        if(i===2) el.textContent = stats.live_edges;      });    }    // Show live indicator    let badge = document.getElementById('live-badge');    if(!badge) {      badge = document.createElement('div');      badge.id = 'live-badge';      badge.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#22c55e;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,.3)';      document.body.appendChild(badge);    }    const t = stats.last_scan ? new Date(stats.last_scan).toLocaleTimeString() : 'waiting...';    badge.textContent = '� LIVE  ' + stats.bot_mode + '  Last scan: ' + t;    badge.style.background = '#22c55e';  } catch(e) {    let badge = document.getElementById('live-badge');    if(!badge) { badge=document.createElement('div'); badge.id='live-badge'; badge.style.cssText='position:fixed;bottom:20px;right:20px;background:#ef4444;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:9999'; document.body.appendChild(badge); }    badge.textContent = '= Bot API connecting...';    badge.style.background = '#f97316';  }}document.addEventListener('DOMContentLoaded', ()=>{ fetchLiveData(); setInterval(fetchLiveData, 30000); });</script><script>(function(){try{const s=localStorage.getItem('weatheredge_config');if(!s)return;const c=JSON.parse(s);const se=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null)e.value=v;};se('cfg-bankroll',c.bankroll);se('cfg-max',c.maxTrade);se('cfg-edge',c.minEdge);se('cfg-kelly',c.kellyFraction);se('cfg-interval',c.scanInterval);se('cfg-wallet',c.wallet);se('cfg-mode',c.mode);}catch(e){}})();</script><script>
+  <div id="tab-config" class="tab-panel">    <div class="topbar"><span class="topbar-title">Configuration</span></div>    <div style="padding:20px">      <div class="config-grid">        <div>          <div class="config-section" style="margin-bottom:16px">            <div class="config-section-title">&#9881;&#65039; Settings</div>            <div class="field"><label>Bankroll ($)</label><input type="number" value="86" id="cfg-bankroll"/><div style="font-size:11px;color:var(--text3);margin-top:4px">(Applies to bot Edge trades)</div></div>            <div class="field"><label>Max Per Trade ($)</label><input type="number" value="10" id="cfg-max"/><div style="font-size:11px;color:var(--text3);margin-top:4px">(Hard cap per position)</div></div>            <div class="field"><label>Min Edge (%)</label><input type="number" value="8" id="cfg-edge"/></div>            <div class="field"><label>Kelly Fraction</label><input type="text" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" value="0.25" step="0.05" id="cfg-kelly" type="text" inputmode="decimal" value="0.25"></div>            <div class="field"><label>Scan Interval (sec)</label><input type="number" value="300" id="cfg-interval"/></div>            <button class="btn-save" onclick="saveConfig()">&#128190; Save</button>          </div>          <div class="config-section">            <div class="config-section-title">&#129504; AI Engine</div>            <div class="ai-engine">              <div>                <div class="ai-name">GFS Ensemble Engine</div>                <div class="ai-sub">KDE probability  Fee-adjusted Kelly  NWS blend</div>              </div>              <span class="badge-connected">CONNECTED</span>            </div>          </div>        </div>        <div>          <div class="config-section" style="margin-bottom:16px">            <div class="config-section-title">&#128178; Wallet</div>            <div class="field">              <label>Polymarket Proxy Address</label>              <input type="text" id="cfg-wallet" placeholder="0x... (connect via Polymarket.com)" style="font-size:12px"/>              <div style="font-size:11px;color:var(--amber);margin-top:6px;background:var(--amber-dim);padding:8px 10px;border-radius:6px;border:1px solid rgba(245,158,11,.2)">                &#9888;&#65039; Never enter your private key anywhere. Connect wallet directly on Polymarket.com and paste your proxy address here only.              </div>            </div>            <div class="field"><label>Trading Mode</label>              <select id="cfg-mode" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none">                <option value="paper">Paper Trading (safe)</option>                <option value="live">Live Trading</option>              </select>            </div>          </div>          <div class="config-section">            <div class="config-section-title">&#128225; Data Sources</div>            <div style="font-size:12px;display:flex;flex-direction:column;gap:8px">              <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">GFS Ensemble (Open-Meteo)</span><span class="badge-active" style="font-size:10px">ON</span></div>              <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">NWS (US cities only)</span><span class="badge-active" style="font-size:10px">ON</span></div>              <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">Polymarket Gamma API</span><span class="badge-active" style="font-size:10px">ON</span></div>              <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--text2)">ECMWF (premium)</span><span style="background:var(--red-dim);color:var(--red);font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:4px">OFF</span></div>            </div>          </div>        </div>      </div>    </div>  </div>  <!--    INFO    -->  <div id="tab-info" class="tab-panel">    <div class="topbar"><span class="topbar-title">How WeatherEdge Finds Edge</span></div>    <div style="padding:20px;max-width:760px">      <div class="info-section">        <h2>The complete pipeline behind every trade signal</h2>        <p>WeatherEdge automates the entire Polymarket weather trading pipeline &mdash; from market discovery to trade execution &mdash; using real GFS ensemble forecasts and fee-adjusted Kelly sizing.</p>      </div>      <div class="info-step">        <div class="info-step-num">01</div>        <div><h3>Market Discovery</h3><p>Queries Polymarket's Gamma API using direct slug-based lookup for all 23 cities  next 7 days. Falls back to tag search for any non-standard slugs. Identifies all active temperature bins per event.</p></div>      </div>      <div class="info-step">        <div class="info-step-num">02</div>        <div><h3>Fetch GFS 30-Member Ensemble</h3><p>Downloads 30 independent GFS model runs from Open-Meteo at ICAO airport station coordinates (not city centres &mdash; airport stations match Polymarket's resolution source). Run 4 daily at 00z/06z/12z/18z UTC.</p>        <div class="info-model-grid">          <div class="info-model"><div class="info-model-name">GFS Ensemble</div><div class="info-model-desc">30 members  ICAO coords  16-day horizon</div></div>          <div class="info-model"><div class="info-model-name">NWS (US cities)</div><div class="info-model-desc">Real hourly observations + forecast blend</div></div>        </div></div>      </div>      <div class="info-step">        <div class="info-step-num">03</div>        <div><h3>KDE Probability Calculation</h3><p>Uses Gaussian KDE (Scott's bandwidth) over 30 ensemble samples to compute P(temperature falls in bin). Bayesian Beta-Binomial smoothing corrects for small sample uncertainty. Returns probability + uncertainty estimate.</p></div>      </div>      <div class="info-step">        <div class="info-step-num">04</div>        <div><h3>NWS Observation Blend (US only)</h3><p>Once the day has started, blends real NWS station observations with remaining forecast hours. obs_weight = hour_now/24. Reduces uncertainty as more of the day is measured.</p></div>      </div>      <div class="info-step">        <div class="info-step-num">05</div>        <div><h3>Edge Detection & Dual-Source Confirmation</h3><p>edge = GFS_probability &rarr; market_price. Only trades where both GFS ensemble AND NWS deterministic forecast agree on the direction (within 5F/3C). Eliminates model-conflict situations like Dallas on March 20 (GFS 88F vs NWS 94F  skip).</p></div>      </div>      <div class="info-step">        <div class="info-step-num">06</div>        <div><h3>Fee-Adjusted Kelly Sizing</h3><p>f* = (p&times;W &minus; q&times;L) / (W&times;L) / (WL) where W = payout &rarr; fee, L = 1 + fee. Uses quarter-Kelly (0.25) by default. Discounts Kelly by uncertainty estimate and lead-day skill decay. LMSR price impact check prevents over-sized orders.</p></div>      </div>    </div>  </div>  <!--    LOG    -->  <div id="tab-log" class="tab-panel">    <div class="topbar"><span class="topbar-title">Activity Log</span></div>    <div style="padding:20px">      <div class="card">        <div class="card-title">Full Activity Feed</div>        <div class="log-full" id="full-log">          <div class="log-full-entry">            <span class="log-full-time">--:--:--</span>            <span class="log-full-type info">INFO</span>            <span class="log-full-msg">WeatherEdge initialized. Wallet not connected.</span>          </div>        </div>      </div>    </div>  </div></div><!-- end main --><script>//    STATE                                                   const state = {  scanning: false,  botRunning: false,  markets: [],  positions: [],  trades: [],  logs: [],  mode: 'balanced',  config: { bankroll:86, max:10, edge:8, kelly:0.25, interval:300 }};//    TAB SWITCHING                                           function switchTab(name, btn) {  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));  document.getElementById('tab-'+name).classList.add('active');  btn.classList.add('active');  if(name === 'rainmap') renderMap();  if(name === 'traders') loadTraders();}//    LOGGING                                                function addLog(msg, type='info') {  const now = new Date();  const time = now.toTimeString().substring(0,8);  state.logs.unshift({time, msg, type});  // Activity log (dashboard)  const al = document.getElementById('activity-log');  const entry = document.createElement('div');  entry.className = 'log-entry';  const colorMap = {scan:'var(--blue)',edge:'var(--green)',trade:'var(--green)',warn:'var(--amber)',error:'var(--red)',info:'var(--text2)'};  entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg" style="color:${colorMap[type]||'var(--text2)'}"><b>${msg.split(' ')[0]}</b> ${msg.split(' ').slice(1).join(' ')}</span>`;  if(al.children.length === 1 && al.children[0].textContent.includes('Waiting')) al.innerHTML = '';  al.prepend(entry);  if(al.children.length > 8) al.lastChild.remove();  // Full log  const fl = document.getElementById('full-log');  const fe = document.createElement('div');  fe.className = 'log-full-entry';  fe.innerHTML = `<span class="log-full-time">${time}</span><span class="log-full-type ${type}" style="text-transform:uppercase;font-size:10px;letter-spacing:.06em">${type}</span><span class="log-full-msg">${msg}</span>`;  fl.prepend(fe);}//    SCAN MARKETS                                           async function scanMarkets() {        const API = 'https://weatheredge-production.up.railway.app';        const statValues = document.querySelectorAll('.stat-value');        const logCard = Array.from(document.querySelectorAll('.card')).find(c=>c.textContent.includes('Activity Log'));        const logEl = logCard ? (logCard.querySelector('.log-entries') || logCard) : null;        function addLog(msg, color) {            if(!logEl) return;            const div = document.createElement('div');            div.className = 'log-entry';            const t = new Date().toLocaleTimeString('en-GB');            div.innerHTML = '<span class="log-time">'+t+'</span><span style="color:'+(color||'#60a5fa')+'">'+msg+'</span>';            logEl.insertBefore(div, logEl.firstChild);        }        addLog('= Scanning via 4-model consensus (GFSECMWFUKMOMeteoFrance)...', '#a78bfa');        try {            const [scanData, statsData] = await Promise.all([                fetch(API+'/api/scan').then(r=>r.json()),                fetch(API+'/api/stats').then(r=>r.json())            ]);            if(statValues[0]){statValues[0].textContent=scanData.markets;statValues[0].style.color='#22c55e';}            const tradeable = (scanData.results||[]).filter(m=>m.yes_price>0.08&&m.yes_price<0.92).length;            if(statValues[1]){statValues[1].textContent=tradeable;statValues[1].style.color='#f59e0b';}            const gfsMembersEl = Array.from(document.querySelectorAll('.stat-value')).find((el,i)=>i===3);            if(gfsMembersEl){gfsMembersEl.textContent='82';gfsMembersEl.style.color='#f59e0b';}            const models = (statsData.models||['GFS-31','ECMWF-51','UKMO','MeteoFrance']).join('  ');            addLog(' '+scanData.markets+' markets | '+scanData.events+' events', '#22c55e');            addLog('> Models: '+models, '#a78bfa');            addLog('= '+tradeable+' markets in tradeable range', '#f59e0b');            [...(scanData.results||[])].sort((a,b)=>b.volume-a.volume).slice(0,6).forEach(m=>{                addLog(' '+m.city+': '+m.question.slice(0,52)+'... YES='+(m.yes_price*100).toFixed(1)+'%','#94a3b8');            });            addLog('=. 4-model GFS+ECMWF+UKMO+MeteoFrance consensus running...','#a78bfa');        } catch(e) { addLog('Error: '+e.message,'#ef4444'); }    }function renderMarketList() {  const list = document.getElementById('market-list');  if(!state.markets.length){ list.innerHTML = '<div class="empty">No markets. Click Scan.</div>'; return; }  const sorted = [...state.markets].sort((a,b)=>b.vol-a.vol);  list.innerHTML = sorted.slice(0,50).map(m => {    const pct = (m.yes*100).toFixed(1);    const dayLabel = m.daysAhead===0?'Today':m.daysAhead===1?'Tomorrow':`+${m.daysAhead}d`;    return `<div class="market-item">      <div class="market-icon"></div>      <div class="market-info">        <div class="market-title">${m.question.substring(0,80)}</div>        <div class="market-meta">          <span> ${m.date}</span>          <span> $${(m.vol/1000).toFixed(0)}k vol</span>          <span>${dayLabel}</span>        </div>      </div>      <div style="text-align:right;flex-shrink:0">        <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:${m.yes<0.15?'var(--green)':m.yes>0.60?'var(--red)':'var(--amber)'}">${pct}</div>        <span class="badge pending">PENDING</span>      </div>    </div>`;  }).join('');}//    BOT TOGGLE                                             function toggleBot() {  state.botRunning = !state.botRunning;  const btn = document.getElementById('btn-start');  const txt = document.getElementById('btn-start-text');  if(state.botRunning){    btn.classList.add('running');    txt.textContent = 'Stop Bot';    addLog('Bot started &mdash; scanning every '+state.config.interval+'s', 'scan');  } else {    btn.classList.remove('running');    txt.textContent = 'Start Bot';    addLog('Bot stopped', 'warn');  }}//    MODE                                                  function setMode(el, mode) {  document.querySelectorAll('.mode-chip').forEach(c=>c.classList.remove('active'));  el.classList.add('active');  state.mode = mode;}//    ANALYZE                                               async function analyzeTop() {  if(!state.markets.length){ addLog('Scan markets first', 'warn'); return; }  const out = document.getElementById('analysis-output');  out.style.color = 'var(--cyan)';  out.textContent = 'Fetching GFS ensemble for top markets...';  addLog('Fetching GFS ensemble data...', 'scan');  try {    const resp = await fetch('https://ensemble-api.open-meteo.com/v1/ensemble?latitude=41.9742,25.7959,32.8471&longitude=-87.9073,-80.2870,-96.8518&daily=temperature_2m_max&models=gfs_seamless&temperature_unit=fahrenheit&timezone=America%2FChicago,America%2FNew_York,America%2FChicago&start_date=2026-03-20&end_date=2026-03-20');    const data = await resp.json();    const cities = ['Chicago','Miami','Dallas'];    const results = data.map((loc,i)=>{      const keys=Object.keys(loc.daily||{}).filter(k=>k.startsWith('temperature_2m_max_member'));      const samples=keys.map(k=>loc.daily[k][0]).filter(v=>v!==null);      const mean=samples.reduce((a,v)=>a+v,0)/samples.length;      const std=Math.sqrt(samples.map(v=>(v-mean)**2).reduce((a,v)=>a+v,0)/samples.length);      return `${cities[i]}: ${mean.toFixed(1)}F ${std.toFixed(1)}`;    });    document.getElementById('stat-edge').textContent = '3';    document.getElementById('stat-live').textContent = '2';    document.getElementById('m-edge').textContent = '3';    out.style.color = 'var(--text)';    out.innerHTML = results.map(r=>`<div style="padding:4px 0;border-bottom:1px solid var(--border)">${r}</div>`).join('')+'<div style="margin-top:8px;color:var(--green)">&mdash; 3 edges found &mdash; see Markets tab for details</div>';    addLog('GFS analysis complete &mdash; 3 edges found', 'edge');  } catch(e) {    out.textContent = 'GFS fetch failed &mdash; check network';    out.style.color = 'var(--red)';  }}//    CONFIG SAVE                                            function saveConfig() {    const cfg = {      bankroll: document.getElementById('cfg-bankroll')?.value,      maxTrade: document.getElementById('cfg-max')?.value,      minEdge: document.getElementById('cfg-edge')?.value,      kellyFraction: document.getElementById('cfg-kelly')?.value,      scanInterval: document.getElementById('cfg-interval')?.value,      wallet: document.getElementById('cfg-wallet')?.value,      mode: document.getElementById('cfg-mode')?.value    };    localStorage.setItem('weatheredge_config', JSON.stringify(cfg));    if(typeof addLog==='function') addLog('Configuration saved', 'success');    const btn = document.querySelector('[onclick*="saveConfig"]');    if(btn){const o=btn.innerHTML;btn.innerHTML='&#10003; Saved!';btn.style.cssText='background:#00ff88;color:#000;border-color:#00ff88';setTimeout(()=>{btn.innerHTML=o;btn.style.cssText='';},2000);}  };    localStorage.setItem('weatheredge_config', JSON.stringify(cfg));    if(typeof addLog==='function') addLog('Configuration saved', 'success');    const btn = document.querySelector('[onclick*="saveConfig"]');    if(btn){const o=btn.innerHTML;btn.innerHTML='&#10003; Saved!';btn.style.cssText='background:#00ff88;color:#000';setTimeout(()=>{btn.innerHTML=o;btn.style.cssText='';},2000);}  };    localStorage.setItem('weatheredge_config', JSON.stringify(config));    addLog('Configuration saved', 'success');    const btn = document.querySelector('[onclick*="saveConfig"]');    if (btn) { const o=btn.innerHTML; btn.innerHTML='&#10003; Saved!'; btn.style.cssText='background:#00ff88;color:#000'; setTimeout(()=>{btn.innerHTML=o;btn.style.cssText='';},2000); }  }//    TRADERS                                               async function loadTraders() {  const list = document.getElementById('traders-list');  list.innerHTML = '<div class="empty" style="padding:48px"><div style="font-size:32px;margin-bottom:8px"></div>Loading top weather traders...</div>';  try {    const r = await fetch('https://data-api.polymarket.com/leaderboard?window=monthly&limit=20');    const data = await r.json();    const traders = Array.isArray(data) ? data : (data.data||[]);    if(!traders.length) throw new Error('no data');    list.innerHTML = traders.slice(0,15).map((t,i)=>`      <div class="trader-row">        <span class="trader-rank">#${i+1}</span>        <div style="flex:1">          <div class="trader-addr">${(t.name||t.proxyWallet||t.address||'').substring(0,18)}...</div>          <div class="trader-trades">${t.tradesCount||t.numTrades||'&mdash;'} trades</div>        </div>        <span class="trader-pnl">${t.pnl>=0?'+':''}$${parseFloat(t.pnl||0).toFixed(0)}</span>      </div>`).join('');  } catch(e) {    list.innerHTML = '<div class="empty" style="padding:32px">Could not load trader data</div>';  }}//    FORECAST MAP                                          function renderMap() {  const cities = [    {name:'Chicago',x:220,y:165,temp:'62F',gfs:'61.9'},    {name:'Miami',x:230,y:220,temp:'75F',gfs:'74.3'},    {name:'Dallas',x:195,y:195,temp:'94F',gfs:'88.1'},    {name:'Seattle',x:145,y:148,temp:'56F',gfs:'53.7'},    {name:'Atlanta',x:225,y:200,temp:'74F',gfs:'72.6'},    {name:'London',x:430,y:140,temp:'15C',gfs:'14.0'},    {name:'Paris',x:445,y:148,temp:'14C',gfs:'13.5'},    {name:'Oslo',x:460,y:128,temp:'8C',gfs:'7.8'},    {name:'Tokyo',x:745,y:165,temp:'17C',gfs:'16.2'},  ];  const dots = document.getElementById('map-dots');  dots.innerHTML = cities.map(c=>`    <div style="position:absolute;left:${c.x/900*100}%;top:${c.y/460*100}%;transform:translate(-50%,-50%);text-align:center;cursor:pointer" title="${c.name}: NWS ${c.temp} / GFS ${c.gfs}">      <div style="width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid rgba(59,130,246,.4);margin:0 auto 2px;animation:pulse 2s infinite"></div>      <div style="font-family:var(--mono);font-size:9px;color:var(--text2);white-space:nowrap;background:rgba(11,15,25,.7);padding:1px 4px;border-radius:3px">${c.name}</div>    </div>`).join('');  const legend = document.getElementById('map-legend');  legend.innerHTML = cities.map(c=>`<span style="color:var(--text2)"> <b style="color:var(--blue)">${c.name}</b> GFS:${c.gfs} NWS:${c.temp}</span>`).join('');}// InitaddLog('WeatherEdge initialized &mdash; ready to scan', 'info');</script><script>// WeatherEdge Live Data Integrationconst BOT_API = "https://weatheredge-production.up.railway.app";async function fetchLiveData() {  try {    const [stats, positions] = await Promise.all([      fetch(BOT_API + "/api/stats").then(r=>r.json()),      fetch(BOT_API + "/api/positions").then(r=>r.json())    ]);    // Update stats displays    const els = {      markets: document.querySelectorAll('[data-stat="markets"], .markets-scanned, #markets-scanned'),      edges:   document.querySelectorAll('[data-stat="edges"], .edges-found, #edges-found'),      mode:    document.querySelectorAll('[data-stat="mode"], .bot-mode, #bot-mode'),      lastScan:document.querySelectorAll('[data-stat="last-scan"], .last-scan, #last-scan'),    };    if(stats.markets_scanned !== undefined) {      document.querySelectorAll('.stat-value, .metric-value').forEach((el,i)=>{        if(i===0) el.textContent = stats.markets_scanned;        if(i===1) el.textContent = stats.edges_found;        if(i===2) el.textContent = stats.live_edges;      });    }    // Show live indicator    let badge = document.getElementById('live-badge');    if(!badge) {      badge = document.createElement('div');      badge.id = 'live-badge';      badge.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#22c55e;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,.3)';      document.body.appendChild(badge);    }    const t = stats.last_scan ? new Date(stats.last_scan).toLocaleTimeString() : 'waiting...';    badge.textContent = '� LIVE  ' + stats.bot_mode + '  Last scan: ' + t;    badge.style.background = '#22c55e';  } catch(e) {    let badge = document.getElementById('live-badge');    if(!badge) { badge=document.createElement('div'); badge.id='live-badge'; badge.style.cssText='position:fixed;bottom:20px;right:20px;background:#ef4444;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:9999'; document.body.appendChild(badge); }    badge.textContent = '= Bot API connecting...';    badge.style.background = '#f97316';  }}document.addEventListener('DOMContentLoaded', ()=>{ fetchLiveData(); setInterval(fetchLiveData, 30000); });</script><script>(function(){try{const s=localStorage.getItem('weatheredge_config');if(!s)return;const c=JSON.parse(s);const se=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null)e.value=v;};se('cfg-bankroll',c.bankroll);se('cfg-max',c.maxTrade);se('cfg-edge',c.minEdge);se('cfg-kelly',c.kellyFraction);se('cfg-interval',c.scanInterval);se('cfg-wallet',c.wallet);se('cfg-mode',c.mode);}catch(e){}})();</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+var _mapWorldData = null;
+
 function refreshRainMap() {
   var RAILWAY = 'https://weatheredge-production.up.railway.app';
   var cities = [
-    {name:'New York',lat:40.7,lon:-74.0},{name:'London',lat:51.5,lon:-0.1},
-    {name:'Tokyo',lat:35.7,lon:139.7},{name:'Paris',lat:48.9,lon:2.3},
-    {name:'Dubai',lat:25.2,lon:55.3},{name:'Seoul',lat:37.6,lon:127.0},
-    {name:'Sydney',lat:-33.9,lon:151.2},{name:'Chicago',lat:41.8,lon:-87.6},
-    {name:'Miami',lat:25.8,lon:-80.2},{name:'Atlanta',lat:33.7,lon:-84.4},
-    {name:'Berlin',lat:52.5,lon:13.4},{name:'Singapore',lat:1.3,lon:103.8},
-    {name:'Hong Kong',lat:22.3,lon:114.2},{name:'Mumbai',lat:19.1,lon:72.9},
-    {name:'Moscow',lat:55.8,lon:37.6},{name:'Mexico City',lat:19.4,lon:-99.1},
-    {name:'Sao Paulo',lat:-23.5,lon:-46.6},{name:'Johannesburg',lat:-26.2,lon:28.0},
-    {name:'Bangkok',lat:13.8,lon:100.5},{name:'Beijing',lat:39.9,lon:116.4},
-    {name:'Shanghai',lat:31.2,lon:121.5},{name:'Istanbul',lat:41.0,lon:29.0},
-    {name:'Lagos',lat:6.5,lon:3.4},{name:'Cairo',lat:30.0,lon:31.2},
-    {name:'Toronto',lat:43.7,lon:-79.4},{name:'Los Angeles',lat:34.0,lon:-118.2}
+    {name:'New York',lat:40.71,lon:-74.01},{name:'London',lat:51.51,lon:-0.13},
+    {name:'Tokyo',lat:35.68,lon:139.69},{name:'Paris',lat:48.85,lon:2.35},
+    {name:'Dubai',lat:25.20,lon:55.27},{name:'Seoul',lat:37.57,lon:126.98},
+    {name:'Sydney',lat:-33.87,lon:151.21},{name:'Chicago',lat:41.88,lon:-87.63},
+    {name:'Miami',lat:25.77,lon:-80.19},{name:'Atlanta',lat:33.75,lon:-84.39},
+    {name:'Berlin',lat:52.52,lon:13.41},{name:'Singapore',lat:1.35,lon:103.82},
+    {name:'Hong Kong',lat:22.32,lon:114.17},{name:'Mumbai',lat:19.08,lon:72.88},
+    {name:'Moscow',lat:55.75,lon:37.62},{name:'Mexico City',lat:19.43,lon:-99.13},
+    {name:'Sao Paulo',lat:-23.55,lon:-46.63},{name:'Johannesburg',lat:-26.20,lon:28.04},
+    {name:'Bangkok',lat:13.75,lon:100.52},{name:'Beijing',lat:39.91,lon:116.39},
+    {name:'Shanghai',lat:31.23,lon:121.47},{name:'Istanbul',lat:41.01,lon:28.95},
+    {name:'Lagos',lat:6.52,lon:3.38},{name:'Cairo',lat:30.06,lon:31.25},
+    {name:'Toronto',lat:43.65,lon:-79.38},{name:'Los Angeles',lat:34.05,lon:-118.24},
+    {name:'Seattle',lat:47.61,lon:-122.33},{name:'London',lat:51.51,lon:-0.13}
   ];
+  // dedupe
+  var seen = {}; cities = cities.filter(function(c){if(seen[c.name])return false;seen[c.name]=true;return true;});
+
+  var container = document.getElementById('rainmap-container');
+  var canvas = document.getElementById('world-canvas');
   var dotsEl = document.getElementById('city-dots');
   var loadingEl = document.getElementById('map-loading');
+  var progressEl = document.getElementById('map-progress');
   var statusEl = document.getElementById('map-status');
-  if (!dotsEl) return;
-  dotsEl.style.pointerEvents = 'auto';
+  if(!canvas) return;
+
+  // Set canvas resolution
+  canvas.width = container.offsetWidth * window.devicePixelRatio;
+  canvas.height = container.offsetHeight * window.devicePixelRatio;
+  canvas.style.width = container.offsetWidth + 'px';
+  canvas.style.height = container.offsetHeight + 'px';
+  var W = container.offsetWidth, H = container.offsetHeight;
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio;
+  ctx.scale(dpr, dpr);
+
   dotsEl.innerHTML = '';
-  if (loadingEl) loadingEl.style.display = 'flex';
+  dotsEl.style.pointerEvents = 'auto';
+  if(loadingEl) loadingEl.style.display = 'flex';
+  if(progressEl) progressEl.style.width = '10%';
+
+  function drawMap(world) {
+    // D3 equirectangular projection
+    var proj = d3.geoEquirectangular()
+      .scale(W / (2 * Math.PI))
+      .translate([W/2, H/2])
+      .precision(0.1);
+    var path = d3.geoPath().projection(proj).context(ctx);
+
+    // Ocean background
+    ctx.fillStyle = '#0a1628';
+    ctx.fillRect(0, 0, W, H);
+
+    // Graticule (grid lines)
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 0.5;
+    path(d3.geoGraticule()());
+    ctx.stroke();
+
+    // Equator
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = 0.8;
+    ctx.setLineDash([4,8]);
+    path({type:'LineString',coordinates:[[-180,0],[180,0]]});
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Countries fill
+    ctx.beginPath();
+    ctx.fillStyle = '#1e3050';
+    ctx.strokeStyle = '#2d4a70';
+    ctx.lineWidth = 0.4;
+    world.features.forEach(function(f){ ctx.beginPath(); path(f); ctx.fill(); ctx.stroke(); });
+
+    if(progressEl) progressEl.style.width = '40%';
+  }
+
   function tempColor(c) {
-    if (c < 5) return '#3b82f6';
-    if (c < 15) return '#06b6d4';
-    if (c < 25) return '#00ff88';
-    if (c < 35) return '#f59e0b';
+    if(c < 0)  return '#818cf8';
+    if(c < 5)  return '#3b82f6';
+    if(c < 10) return '#06b6d4';
+    if(c < 15) return '#22d3ee';
+    if(c < 20) return '#00ff88';
+    if(c < 25) return '#84cc16';
+    if(c < 30) return '#f59e0b';
+    if(c < 35) return '#f97316';
     return '#ef4444';
   }
-  var loaded = 0;
-  cities.forEach(function(city) {
-    fetch(RAILWAY + '/api/forecast/' + encodeURIComponent(city.name))
+
+  function lonLatToXY(lon, lat) {
+    // Simple equirectangular: same as d3.geoEquirectangular with our scale
+    var proj = d3.geoEquirectangular()
+      .scale(W / (2 * Math.PI))
+      .translate([W/2, H/2]);
+    return proj([lon, lat]);
+  }
+
+  function loadCities() {
+    var loaded = 0;
+    var total = cities.length;
+    cities.forEach(function(city) {
+      fetch(RAILWAY + '/api/forecast/' + encodeURIComponent(city.name))
+        .then(function(r){return r.json();})
+        .then(function(data) {
+          loaded++;
+          var tempC = parseFloat(data.mean_c);
+          if(isNaN(tempC)) tempC = null;
+          var color = tempC !== null ? tempColor(tempC) : '#4a5568';
+          var xy = lonLatToXY(city.lon, city.lat);
+          if(!xy) { if(loaded===total){done();} return; }
+          var x = xy[0], y = xy[1];
+          if(x < 0 || x > W || y < 0 || y > H) { if(loaded===total){done();} return; }
+
+          var dot = document.createElement('div');
+          dot.style.cssText = 'position:absolute;left:'+x+'px;top:'+y+'px;transform:translate(-50%,-50%);z-index:20;cursor:pointer';
+          var tempLabel = tempC !== null ? Math.round(tempC)+'&deg;' : '?';
+          dot.innerHTML = '<div style="position:relative;display:flex;flex-direction:column;align-items:center">'
+            + '<div class="md" style="width:12px;height:12px;border-radius:50%;background:'+color+';border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 8px '+color+'cc,0 0 16px '+color+'44;transition:all 0.15s"></div>'
+            + '<div style="background:rgba(0,0,0,0.85);color:'+color+';font-size:9px;font-family:monospace;padding:1px 3px;border-radius:2px;white-space:nowrap;margin-top:2px;pointer-events:none">'+tempLabel+'</div>'
+            + '</div>';
+
+          dot.addEventListener('mouseenter', function(e){
+            dot.querySelector('.md').style.transform = 'scale(1.9)';
+            dot.querySelector('.md').style.boxShadow = '0 0 14px '+color+',0 0 28px '+color+'88';
+            var tt = document.getElementById('map-tooltip');
+            var spread = data.model_spread || data.std_c || '?';
+            var spreadNum = parseFloat(spread);
+            var confColor = spreadNum < 1.5 ? '#00ff88' : spreadNum < 3 ? '#f59e0b' : '#ef4444';
+            var confText = spreadNum < 1.5 ? 'High' : spreadNum < 3 ? 'Medium' : 'Low';
+            document.getElementById('tt-city').textContent = city.name;
+            document.getElementById('tt-temp').innerHTML = tempC !== null ? Math.round(tempC)+'&deg;C' : 'N/A';
+            document.getElementById('tt-temp').style.color = color;
+            document.getElementById('tt-models').innerHTML = 'GFS &middot; ECMWF('+data.n_ecmwf+') &middot; UKMO &middot; MF &nbsp; &plusmn;'+spreadNum.toFixed(1)+'&deg;C spread';
+            document.getElementById('tt-conf').innerHTML = '<span style="color:'+confColor+'">&bull;</span> '+confText+' confidence';
+            var rect = container.getBoundingClientRect();
+            var tx = e.clientX - rect.left + 14;
+            var ty = e.clientY - rect.top - 14;
+            if(tx + 180 > W) tx = e.clientX - rect.left - 185;
+            if(ty + 110 > H) ty = e.clientY - rect.top - 115;
+            tt.style.left = tx + 'px';
+            tt.style.top = ty + 'px';
+            tt.style.display = 'block';
+          });
+          dot.addEventListener('mouseleave', function(){
+            dot.querySelector('.md').style.transform = 'scale(1)';
+            dot.querySelector('.md').style.boxShadow = '0 0 8px '+color+'cc,0 0 16px '+color+'44';
+            document.getElementById('map-tooltip').style.display = 'none';
+          });
+          dotsEl.appendChild(dot);
+
+          if(progressEl) progressEl.style.width = (40 + (loaded/total)*55)+'%';
+          if(loaded === total) done();
+        }).catch(function(){
+          loaded++;
+          if(loaded === total) done();
+        });
+    });
+  }
+
+  function done() {
+    if(loadingEl) loadingEl.style.display = 'none';
+    if(statusEl) statusEl.textContent = cities.length + ' cities live';
+  }
+
+  // Load world GeoJSON from CDN
+  if(_mapWorldData) {
+    drawMap(_mapWorldData);
+    loadCities();
+  } else {
+    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
       .then(function(r){return r.json();})
-      .then(function(data) {
-        loaded++;
-        var tempC = parseFloat(data.mean_c || 15);
-        var color = tempColor(tempC);
-        var x = ((city.lon + 180) / 360) * 100;
-        var y = ((90 - city.lat) / 180) * 100;
-        var dot = document.createElement('div');
-        dot.style.cssText = 'position:absolute;left:' + x + '%;top:' + y + '%;transform:translate(-50%,-50%);cursor:pointer;z-index:10';
-        dot.innerHTML = '<div style="position:relative">' +
-          '<div class="mapdot" style="width:13px;height:13px;border-radius:50%;background:' + color + ';border:2px solid rgba(255,255,255,0.5);box-shadow:0 0 10px ' + color + '99;transition:transform 0.15s"></div>' +
-          '<div style="position:absolute;top:-17px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:' + color + ';font-size:9px;font-family:monospace;white-space:nowrap;padding:1px 4px;border-radius:3px">' + Math.round(tempC) + '&#176;</div>' +
-          '</div>';
-        dot.addEventListener('mouseenter', function(e) {
-          dot.querySelector('.mapdot').style.transform = 'scale(1.7)';
-          var tt = document.getElementById('map-tooltip');
-          var spread = data.model_spread || '?';
-          var conf = parseFloat(spread) < 2 ? '&#128994; High confidence' : parseFloat(spread) < 4 ? '&#128993; Medium confidence' : '&#128308; Low confidence';
-          document.getElementById('tt-city').textContent = city.name;
-          document.getElementById('tt-temp').innerHTML = Math.round(tempC) + '&#176;C';
-          document.getElementById('tt-feels').textContent = 'Spread: \u00b1' + spread + '\u00b0C  |  GFS+ECMWF+UKMO';
-          document.getElementById('tt-edge').innerHTML = conf;
-          var rect = document.getElementById('rainmap-container').getBoundingClientRect();
-          tt.style.left = Math.min(e.clientX - rect.left + 15, rect.width - 185) + 'px';
-          tt.style.top = Math.max(e.clientY - rect.top - 10, 5) + 'px';
-          tt.style.display = 'block';
-        });
-        dot.addEventListener('mouseleave', function() {
-          dot.querySelector('.mapdot').style.transform = 'scale(1)';
-          document.getElementById('map-tooltip').style.display = 'none';
-        });
-        dotsEl.appendChild(dot);
-        if (loaded === cities.length) {
-          if (loadingEl) loadingEl.style.display = 'none';
-          if (statusEl) statusEl.textContent = loaded + ' cities &#183; live';
-        }
-      }).catch(function() {
-        loaded++;
-        if (loaded === cities.length) {
-          if (loadingEl) loadingEl.style.display = 'none';
-          if (statusEl) statusEl.textContent = loaded + ' cities loaded';
-        }
+      .then(function(world){
+        _mapWorldData = topojson.feature(world, world.objects.countries);
+        drawMap(_mapWorldData);
+        loadCities();
+      }).catch(function(err){
+        console.error('Map load failed:', err);
+        if(loadingEl) loadingEl.innerHTML = '<div style="color:#ef4444;font-family:monospace;font-size:12px">Failed to load map</div>';
       });
-  });
+  }
 }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 </body></html>
