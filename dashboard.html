@@ -103,16 +103,7 @@ window.weLoadTraders = function() {
 var _weOrigSwitch = window.switchTab;
 window.switchTab = function(t) { if (_weOrigSwitch) _weOrigSwitch(t); if (t==="traders") setTimeout(window.weLoadTraders, 200); };
 window.doSwitchTab = window.switchTab;
-// Hide rain map topbar buttons on non-rainmap tabs
-var _origSwitchForTopbar = window.switchTab;
-window.switchTab = function(t){
-  _origSwitchForTopbar(t);
-  var tr = document.querySelector(".topbar-right");
-  if(tr) tr.style.display = (t==="rainmap") ? "flex" : "none";
-};
-window.doSwitchTab = window.switchTab;
-// Hide on initial load
-setTimeout(function(){ var tr=document.querySelector(".topbar-right"); if(tr) tr.style.display="none"; },200);
+
 // Auto-fix orphaned source-grid
 setTimeout(function(){
   var sg=document.querySelector(".source-grid");
