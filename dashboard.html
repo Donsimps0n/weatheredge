@@ -47,6 +47,13 @@
         };
       }
     });
+    // Move orphaned tab panels into .main
+    var _main = document.querySelector(".main");
+    if (_main) {
+      Array.from(document.body.children).forEach(function(el){
+        if (el.classList.contains("tab-panel")) _main.appendChild(el);
+      });
+    }
     doSwitchTab("dashboard");
   }, 100);
 })();
