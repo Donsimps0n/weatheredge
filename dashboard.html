@@ -110,3 +110,176 @@ setTimeout(function(){
   if(sg&&ts&&!ts.contains(sg)){var w=sg.parentElement;if(w&&w!==ts)ts.appendChild(w);}
 },150);
 </script>
+
+<div id="tab-rainmap" class="tab-panel" style="display:none">
+  <div class="topbar"><span class="topbar-title">🌡 Weather Map</span>
+    <button onclick="window.loadRainMap()" style="background:var(--accent);color:#000;border:none;padding:4px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:700;margin-left:auto">↻ Refresh</button>
+  </div>
+  <div style="padding:16px 20px 8px">
+    <div id="map-status" style="font-size:12px;color:var(--text3);margin-bottom:8px">Loading city temperatures...</div>
+    <div style="position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <svg id="weather-map-svg" viewBox="0 0 1000 500" width="100%" style="display:block"></svg>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:10px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase">Temperature</span>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text2)">
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#5b9bd5"></span>&lt;0°C
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#4db6e4;margin-left:6px"></span>0–10°C
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#66bb6a;margin-left:6px"></span>10–20°C
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ffa726;margin-left:6px"></span>20–30°C
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ef5350;margin-left:6px"></span>&gt;30°C
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  // City coords: [name, lat, lon]
+  var CITIES = [
+    ["New York",40.64,-73.78],["Los Angeles",33.94,-118.41],["Chicago",41.98,-87.91],
+    ["Miami",25.79,-80.32],["Atlanta",33.64,-84.43],["Dallas",32.90,-97.04],
+    ["Seattle",47.45,-122.31],["Boston",42.37,-71.01],["Denver",39.86,-104.67],
+    ["London",51.48,-0.45],["Paris",49.01,2.55],["Berlin",52.37,13.52],
+    ["Madrid",40.47,-3.56],["Rome",41.80,12.23],["Amsterdam",52.31,4.77],
+    ["Frankfurt",50.03,8.57],["Vienna",48.11,16.57],["Zurich",47.46,8.55],
+    ["Stockholm",59.65,17.92],["Oslo",60.20,11.08],["Copenhagen",55.62,12.66],
+    ["Helsinki",60.32,24.97],["Warsaw",52.17,20.97],["Prague",50.10,14.26],
+    ["Budapest",47.43,19.26],["Bucharest",44.57,26.10],["Athens",37.94,23.95],
+    ["Istanbul",40.98,28.82],["Moscow",55.97,37.41],["Dubai",25.25,55.36],
+    ["Riyadh",24.96,46.70],["Cairo",30.11,31.40],["Nairobi",-1.32,36.93],
+    ["Johannesburg",-26.13,28.25],["Lagos",6.58,3.32],["Mumbai",19.09,72.86],
+    ["Delhi",28.57,77.12],["Bangalore",13.20,77.71],["Karachi",24.91,67.17],
+    ["Dhaka",23.84,90.28],["Colombo",7.18,79.89],["Bangkok",13.69,100.75],
+    ["Singapore",1.36,103.99],["Kuala Lumpur",2.75,101.70],["Jakarta",-6.13,106.66],
+    ["Manila",14.51,121.02],["Ho Chi Minh City",10.82,106.66],["Yangon",16.91,96.14],
+    ["Tokyo",35.55,139.78],["Seoul",37.46,126.44],["Beijing",40.07,116.60],
+    ["Shanghai",31.14,121.80],["Hong Kong",22.31,113.92],["Taipei",25.07,121.22],
+    ["Osaka",34.43,135.24],["Chengdu",30.57,103.95],["Sydney",-33.95,151.18],
+    ["Melbourne",-37.67,144.83],["Buenos Aires",-34.82,-58.53],["Sao Paulo",-23.55,-46.65]
+  ];
+
+  // Convert lat/lon to SVG x/y (equirectangular)
+  function toXY(lat, lon) {
+    var x = ((lon + 180) / 360) * 1000;
+    var y = ((90 - lat) / 180) * 500;
+    return [x, y];
+  }
+
+  // Color by temp (°C)
+  function tempColor(t) {
+    if (t === null || t === undefined) return '#666';
+    if (t < 0)  return '#5b9bd5';
+    if (t < 10) return '#4db6e4';
+    if (t < 20) return '#66bb6a';
+    if (t < 30) return '#ffa726';
+    return '#ef5350';
+  }
+
+  // Simple world map background as SVG rect + ocean fill
+  function drawBase(svg) {
+    svg.innerHTML = '';
+    // Ocean background
+    var bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    bg.setAttribute('width','1000'); bg.setAttribute('height','500');
+    bg.setAttribute('fill','#0d1117'); svg.appendChild(bg);
+    // Grid lines
+    for (var lon = -180; lon <= 180; lon += 30) {
+      var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      var x = ((lon+180)/360)*1000;
+      line.setAttribute('x1',x); line.setAttribute('y1',0);
+      line.setAttribute('x2',x); line.setAttribute('y2',500);
+      line.setAttribute('stroke','#1a2233'); line.setAttribute('stroke-width','0.5');
+      svg.appendChild(line);
+    }
+    for (var lat = -90; lat <= 90; lat += 30) {
+      var line2 = document.createElementNS('http://www.w3.org/2000/svg','line');
+      var y = ((90-lat)/180)*500;
+      line2.setAttribute('x1',0); line2.setAttribute('y1',y);
+      line2.setAttribute('x2',1000); line2.setAttribute('y2',y);
+      line2.setAttribute('stroke','#1a2233'); line2.setAttribute('stroke-width','0.5');
+      svg.appendChild(line2);
+    }
+    // Equator highlight
+    var eq = document.createElementNS('http://www.w3.org/2000/svg','line');
+    eq.setAttribute('x1',0); eq.setAttribute('y1',250);
+    eq.setAttribute('x2',1000); eq.setAttribute('y2',250);
+    eq.setAttribute('stroke','#1e2d45'); eq.setAttribute('stroke-width','1');
+    svg.appendChild(eq);
+  }
+
+  function plotCities(svg, temps) {
+    CITIES.forEach(function(c) {
+      var name = c[0], lat = c[1], lon = c[2];
+      var xy = toXY(lat, lon);
+      var x = xy[0], y = xy[1];
+      var t = temps[name];
+      var col = tempColor(t);
+
+      // Glow circle
+      var glow = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      glow.setAttribute('cx',x); glow.setAttribute('cy',y); glow.setAttribute('r','9');
+      glow.setAttribute('fill',col); glow.setAttribute('opacity','0.2');
+      svg.appendChild(glow);
+
+      // Main dot
+      var dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx',x); dot.setAttribute('cy',y); dot.setAttribute('r','5');
+      dot.setAttribute('fill',col); dot.setAttribute('stroke','#0d1117');
+      dot.setAttribute('stroke-width','1');
+      svg.appendChild(dot);
+
+      // Label
+      var label = document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('x', x+7); label.setAttribute('y', y+4);
+      label.setAttribute('fill','#cdd9e5'); label.setAttribute('font-size','9');
+      label.setAttribute('font-family','monospace');
+      label.textContent = t !== undefined && t !== null ? (Math.round(t)+'°') : '';
+      svg.appendChild(label);
+    });
+  }
+
+  window.loadRainMap = function() {
+    var svg = document.getElementById('weather-map-svg');
+    var status = document.getElementById('map-status');
+    if (!svg) return;
+    drawBase(svg);
+    if (status) status.textContent = 'Loading temperatures for ' + CITIES.length + ' cities...';
+
+    var temps = {};
+    var done = 0;
+    var api = 'https://weatheredge-production.up.railway.app';
+
+    CITIES.forEach(function(c) {
+      var city = c[0].toLowerCase().replace(/ /g,'-');
+      fetch(api + '/api/forecast/' + encodeURIComponent(city))
+        .then(function(r){return r.json();})
+        .then(function(d){
+          // temp is in forecast[0].temp_c or similar
+          var t = null;
+          if (d && d.forecast && d.forecast[0]) t = d.forecast[0].temp_max_c;
+          else if (d && d.temperature !== undefined) t = d.temperature;
+          else if (d && d.temp_c !== undefined) t = d.temp_c;
+          temps[c[0]] = t;
+        })
+        .catch(function(){temps[c[0]]=null;})
+        .finally(function(){
+          done++;
+          if (status) status.textContent = 'Loading... ' + done + '/' + CITIES.length;
+          plotCities(svg, temps);
+          if (done === CITIES.length && status) {
+            status.textContent = 'Live temperatures — ' + new Date().toLocaleTimeString() + ' — ' + done + ' cities';
+          }
+        });
+    });
+  };
+
+  // Auto-load when tab opens
+  var origSt = window._st;
+  window._st = function(tab, el) {
+    if (origSt) origSt(tab, el);
+    if (tab === 'rainmap') setTimeout(window.loadRainMap, 200);
+  };
+  window.doSwitchTab = window._st;
+  window.switchTab = window._st;
+})();
+</script>
