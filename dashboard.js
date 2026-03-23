@@ -6,8 +6,8 @@ const API = 'https://weatheredge-production.up.railway.app';
 window._st = function(tab, btn) {
   document.querySelectorAll('[id^="tab-"]').forEach(function(el){ el.style.display='none'; });
   var t = document.getElementById('tab-' + tab);
-  if (t) t.style.display = '';
-  var nav = document.querySelectorAll('aside button, nav button');
+  if (t) t.style.display = 'block';
+  var nav = document.querySelectorAll('[onclick*="_st"]');
   nav.forEach(function(b){ b.style.opacity='0.5'; });
   if (btn) btn.style.opacity = '1';
 };
