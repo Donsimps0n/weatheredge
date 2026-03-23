@@ -112,8 +112,8 @@ setTimeout(function(){
 </script>
 
 <div id="tab-rainmap" class="tab-panel" style="display:none">
-  <div class="topbar"><span class="topbar-title">🌡 Weather Map</span>
-    <button onclick="window.loadRainMap()" style="background:var(--accent);color:#000;border:none;padding:4px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:700;margin-left:auto">↻ Refresh</button>
+  <div class="topbar"><span class="topbar-title">ð¡ Weather Map</span>
+    <button onclick="window.loadRainMap()" style="background:var(--accent);color:#000;border:none;padding:4px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:700;margin-left:auto">â» Refresh</button>
   </div>
   <div style="padding:16px 20px 8px">
     <div id="map-status" style="font-size:12px;color:var(--text3);margin-bottom:8px">Loading city temperatures...</div>
@@ -123,11 +123,11 @@ setTimeout(function(){
     <div style="display:flex;align-items:center;gap:16px;margin-top:10px;flex-wrap:wrap">
       <span style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase">Temperature</span>
       <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text2)">
-        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#5b9bd5"></span>&lt;0°C
-        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#4db6e4;margin-left:6px"></span>0–10°C
-        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#66bb6a;margin-left:6px"></span>10–20°C
-        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ffa726;margin-left:6px"></span>20–30°C
-        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ef5350;margin-left:6px"></span>&gt;30°C
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#5b9bd5"></span>&lt;0Â°C
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#4db6e4;margin-left:6px"></span>0â10Â°C
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#66bb6a;margin-left:6px"></span>10â20Â°C
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ffa726;margin-left:6px"></span>20â30Â°C
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ef5350;margin-left:6px"></span>&gt;30Â°C
       </div>
     </div>
   </div>
@@ -165,7 +165,7 @@ setTimeout(function(){
     return [x, y];
   }
 
-  // Color by temp (°C)
+  // Color by temp (Â°C)
   function tempColor(t) {
     if (t === null || t === undefined) return '#666';
     if (t < 0)  return '#5b9bd5';
@@ -233,7 +233,7 @@ setTimeout(function(){
       label.setAttribute('x', x+7); label.setAttribute('y', y+4);
       label.setAttribute('fill','#cdd9e5'); label.setAttribute('font-size','9');
       label.setAttribute('font-family','monospace');
-      label.textContent = t !== undefined && t !== null ? (Math.round(t)+'°') : '';
+      label.textContent = t !== undefined && t !== null ? (Math.round(t)+'Â°') : '';
       svg.appendChild(label);
     });
   }
@@ -252,7 +252,7 @@ setTimeout(function(){
           var cities = data.cities || {};
           var count = Object.keys(cities).length;
           if (count === 0) {
-            if (status) status.textContent = "Cache warming — check back in 30s";
+            if (status) status.textContent = "Cache warming â check back in 30s";
             return;
           }
           // Build temps lookup: {cityName: temp_c}
@@ -262,10 +262,10 @@ setTimeout(function(){
           });
           plotCities(svg, temps);
           var time = new Date().toLocaleTimeString();
-          if (status) status.textContent = "Live temperatures — " + time + " — " + count + " cities";
+          if (status) status.textContent = "Live temperatures â " + time + " â " + count + " cities";
         })
         .catch(function(e) {
-          if (status) status.textContent = "API offline — check Railway";
+          if (status) status.textContent = "API offline â check Railway";
           // Draw grey dots so map still shows city locations
           plotCities(svg, {});
         });
@@ -279,3 +279,4 @@ setTimeout(function(){
   window.switchTab = window._st;
 })();
 </script>
+<script src="dashboard.js"></script>
