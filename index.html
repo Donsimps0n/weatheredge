@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WeatherEdge — Polymarket Weather Trading Bot</title>
+<title>WeatherEdge â Polymarket Weather Trading Bot</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#080c10;--bg2:#0d1117;--green:#00ff88;--green-dim:rgba(0,255,136,0.1);--blue:#4da6ff;--amber:#ffb800;--text:#e8edf2;--text2:#8892a0;--text3:#4a5568;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--mono:'Space Mono',monospace;--sans:'Syne',sans-serif}
@@ -120,7 +120,7 @@ footer a:hover{color:var(--text2)}
       <span style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-left:8px">weatheredge-bot &mdash; live scan</span>
     </div>
     <div class="term-body">
-      <div><span class="p">&#10095;</span> <span class="c">weatheredge scan --models all --cities 67+</span></div>
+      <div><span class="p">&#10095;</span> <span class="c">weatheredge scan --models all --cities 58</span></div>
       <div style="margin-top:4px"><span class="ok">&#10003;</span> GFS ensemble loaded &nbsp;<span class="v">31 members</span></div>
       <div><span class="ok">&#10003;</span> ECMWF IFS025 loaded <span class="v">51 members</span></div>
       <div><span class="ok">&#10003;</span> UKMO + MeteoFrance&nbsp; <span class="v">consensus ready</span></div>
@@ -143,9 +143,9 @@ footer a:hover{color:var(--text2)}
   <h2>Everything you need to<br>trade weather profitably</h2>
   <p class="sdesc">Built exclusively for Polymarket weather markets. Every component is optimised for meteorological data and probabilistic edge detection.</p>
   <div class="grid3">
-    <div class="fcard"><div class="ficon">&#127758;</div><div class="ft">4-Model Ensemble</div><div class="fd">GFS (31 members), ECMWF IFS025 (51 members), UKMO, MeteoFrance. Weighted consensus &mdash; 82 total ensemble members per forecast.</div><span class="ftag">ECMWF 35% &middot; GFS 25% &middot; UKMO 20% &middot; MF 20%</span></div>
-    <div class="fcard"><div class="ficon">&#128202;</div><div class="ft">Bayesian Edge Calc</div><div class="fd">Dynamic &sigma; from forecast horizon (0.8&deg; at 6h to 5.5&deg; at 10d+). Normal CDF probabilities blended with NOAA NCEI 10-year base rates.</div><span class="ftag">Kelly sizing &middot; max 15% bankroll</span></div>
-    <div class="fcard"><div class="ficon">&#9889;</div><div class="ft">Real-Time Scanning</div><div class="fd">Scans all 583+ active Polymarket weather events every 5 minutes. Auto-detects city, date and temperature unit from question titles.</div><span class="ftag">5 min refresh &middot; 67+ cities</span></div>
+    <div class="fcard"><div class="ficon">&#127758;</div><div class="ft">4-Model Ensemble</div><div class="fd">GFS (31 members), ECMWF IFS025 (51 members), UKMO, MeteoFrance. Weighted consensus &mdash; 113 total ensemble members per forecast.</div><span class="ftag">ECMWF 35% &middot; GFS 25% &middot; UKMO 20% &middot; MF 20%</span></div>
+    <div class="fcard"><div class="ficon">&#128202;</div><div class="ft">Bayesian Edge Calc</div><div class="fd">Dynamic &sigma; from forecast horizon (0.8&deg; at 6h to 5.5&deg; at 10d+). Normal CDF probabilities blended with NOAA NCEI 10-year base rates.</div><span class="ftag">theoretical EV gating &middot; max 15% bankroll</span></div>
+    <div class="fcard"><div class="ficon">&#9889;</div><div class="ft">Real-Time Scanning</div><div class="fd">Scans all 583+ active Polymarket weather events every 5 minutes. Auto-detects city, date and temperature unit from question titles.</div><span class="ftag">5 min refresh &middot; 58 cities</span></div>
     <div class="fcard"><div class="ficon">&#129504;</div><div class="ft">Claude AI Engine</div><div class="fd">Claude Sonnet analyses each market with forecast data, model agreement scores, and historical base rates. Returns BUY/SKIP with confidence tier.</div><span class="ftag">Powered by Claude Sonnet</span></div>
     <div class="fcard"><div class="ficon">&#127757;</div><div class="ft">67+ Global Cities</div><div class="fd">New York, London, Tokyo, Paris, Dubai, Seoul, Sydney, and 60 more. Auto-detects city from Polymarket question titles. Both &deg;F and &deg;C markets.</div><span class="ftag">US NWS obs &middot; intraday blending</span></div>
     <div class="fcard"><div class="ficon">&#128737;</div><div class="ft">5-Layer Exit System</div><div class="fd">Profit target (60% edge captured), edge convergence (&lt;2%), trailing stop (40% pullback), stop loss (&minus;15%), time decay (2h before resolution).</div><span class="ftag">Auto-managed positions</span></div>
@@ -178,7 +178,7 @@ footer a:hover{color:var(--text2)}
     <h2>Common questions</h2>
     <div style="margin-top:40px">
       <div class="fi"><div class="fq" onclick="tFaq(this)">What weather models does WeatherEdge use?<span class="fc">+</span></div><div class="fa">GFS (31-member ensemble), ECMWF IFS025 (51-member ensemble), UKMO, and MeteoFrance. Weighted consensus: ECMWF 35%, GFS 25%, UKMO 20%, MeteoFrance 20%.</div></div>
-      <div class="fi"><div class="fq" onclick="tFaq(this)">How does edge calculation work?<span class="fc">+</span></div><div class="fa">Builds weighted consensus temperature, calculates dynamic &sigma; based on hours-to-resolution and model spread, runs Normal CDF probabilities per outcome bin, computes edge vs market price, applies quarter-Kelly sizing capped at 15% bankroll.</div></div>
+      <div class="fi"><div class="fq" onclick="tFaq(this)">How does edge calculation work?<span class="fc">+</span></div><div class="fa">Builds weighted consensus temperature, calculates dynamic &sigma; based on hours-to-resolution and model spread, runs Normal CDF probabilities per outcome bin, computes edge vs market price, applies quarter-theoretical EV gating capped at 15% bankroll.</div></div>
       <div class="fi"><div class="fq" onclick="tFaq(this)">What blockchain does it use?<span class="fc">+</span></div><div class="fa">Polygon blockchain using USDC, connected to Polymarket's Central Limit Order Book (CLOB) via their official API. Private keys never leave your device &mdash; all signing happens client-side.</div></div>
       <div class="fi"><div class="fq" onclick="tFaq(this)">Is the bot running 24/7?<span class="fc">+</span></div><div class="fa">Yes. WeatherEdge runs on Railway cloud infrastructure continuously, 24/7, even when your computer is off. Scans every 5 minutes, refreshes forecasts every 10 minutes. Telegram alerts on edge discovery.</div></div>
     </div>
@@ -198,7 +198,7 @@ footer a:hover{color:var(--text2)}
   <div>&copy; 2026 WeatherEdge &middot; Paper trading mode</div>
 </footer>
 <script>
-const TDATA=[{city:'Paris',bin:'17°C',side:'BUY_NO',edge:'+25.7%',up:false},{city:'Seoul',bin:'14°C',side:'BUY_YES',edge:'+53.2%',up:true},{city:'Dubai',bin:'30°C',side:'BUY_YES',edge:'+35.6%',up:true},{city:'London',bin:'16°C',side:'BUY_NO',edge:'+8.4%',up:false},{city:'Tokyo',bin:'10°C',side:'BUY_NO',edge:'+3.2%',up:false},{city:'Atlanta',bin:'77°F',side:'BUY_YES',edge:'+22.0%',up:true},{city:'Sydney',bin:'24°C',side:'BUY_YES',edge:'+18.3%',up:true},{city:'Hong Kong',bin:'28°C',side:'BUY_NO',edge:'+14.1%',up:false}];
+const TDATA=[{city:'Paris',bin:'17Â°C',side:'BUY_NO',edge:'+25.7%',up:false},{city:'Seoul',bin:'14Â°C',side:'BUY_YES',edge:'+53.2%',up:true},{city:'Dubai',bin:'30Â°C',side:'BUY_YES',edge:'+35.6%',up:true},{city:'London',bin:'16Â°C',side:'BUY_NO',edge:'+8.4%',up:false},{city:'Tokyo',bin:'10Â°C',side:'BUY_NO',edge:'+3.2%',up:false},{city:'Atlanta',bin:'77Â°F',side:'BUY_YES',edge:'+22.0%',up:true},{city:'Sydney',bin:'24Â°C',side:'BUY_YES',edge:'+18.3%',up:true},{city:'Hong Kong',bin:'28Â°C',side:'BUY_NO',edge:'+14.1%',up:false}];
 function buildTicker(){const t=document.getElementById('tk');const d=[...TDATA,...TDATA];t.innerHTML=d.map(x=>`<div class="tick-item"><span class="dot ${x.up?'g':'a'}"></span><span>${x.city} ${x.bin}</span><span class="${x.up?'up':'dn'}">${x.side}</span><span style="color:var(--green)">${x.edge}</span></div>`).join('')}
 buildTicker();
 fetch('https://weatheredge-production.up.railway.app/api/scan').then(r=>r.json()).then(d=>{if(d.markets){document.getElementById('sm').textContent=d.markets}}).catch(()=>{});
