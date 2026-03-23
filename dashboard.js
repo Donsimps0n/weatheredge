@@ -1,4 +1,5 @@
-/* ===== WeatherEdge Dashboard Logic ===== */
+/* ===== WeatherEdge v2 Dashboard Logic ===== */
+/* Change this URL when v2 API is deployed */
 const API = 'https://weatheredge-production.up.railway.app';
 
 /* ---- Sidebar Navigation ---- */
@@ -37,6 +38,12 @@ function scanMarkets() {
       if (ee) ee.textContent = edges.length;
       var el = document.getElementById('stat-live');
       if (el) el.textContent = liveEdges.length;
+      /* Update theo EV stat if present */
+      var tevEl = document.getElementById('stat-theo-ev');
+      if (tevEl && edges.length > 0) {
+        var maxEv = Math.max.apply(null, edges.map(function(e){ return e.theoretical_full_ev || e.best_edge || 0; }));
+        tevEl.textContent = (maxEv * 100).toFixed(1) + '%';
+      }
       /* Markets tab counters */
       var mt = document.getElementById('markets-total');
       if (mt) mt.textContent = data.cache_size || data.count || 0;
@@ -50,14 +57,16 @@ function scanMarkets() {
       var ao = document.getElementById('analysis-output');
       if (ao && edges.length > 0) {
         ao.innerHTML = edges.slice(0,15).map(function(e){
-          var edgePct = (e.best_edge * 100).toFixed(1);
-          var color = e.best_edge > 0 ? '#22c55e' : '#ef4444';
+          var ev = e.theoretical_full_ev || e.best_edge || 0;
+          var evPct = (ev * 100).toFixed(1);
+          var color = ev > 0 ? '#22c55e' : '#ef4444';
           return '<div style="padding:8px 0;border-bottom:1px solid #1e293b;font-size:13px">'
             + '<b style="color:#e2e8f0">' + (e.question || e.city || 'Market') + '</b><br>'
-            + 'Edge: <span style="color:' + color + '">' + edgePct + '%</span>'
+            + 'Theo EV: <span style="color:' + color + '">' + evPct + '%</span>'
             + ' &middot; Side: ' + (e.best_side || '-')
             + ' &middot; Price: ' + (e.yes_price || '-')
             + ' &middot; Confidence: ' + ((e.confidence||0)*100).toFixed(0) + '%'
+            + (e.regime ? ' &middot; Regime: ' + e.regime : '')
             + '</div>';
         }).join('');
       } else if (ao) {
@@ -67,8 +76,9 @@ function scanMarkets() {
       var ml = document.getElementById('market-list');
       if (ml && edges.length > 0) {
         ml.innerHTML = edges.map(function(e){
+          var ev = e.theoretical_full_ev || e.best_edge || 0;
           return '<tr><td style="padding:6px;color:#e2e8f0">' + (e.question || e.city) + '</td>'
-            + '<td style="padding:6px;color:#22c55e">' + (e.best_edge*100).toFixed(1) + '%</td>'
+            + '<td style="padding:6px;color:#22c55e">' + (ev*100).toFixed(1) + '%</td>'
             + '<td style="padding:6px">' + (e.best_side||'-') + '</td>'
             + '<td style="padding:6px">' + (e.yes_price||'-') + '</td></tr>';
         }).join('');
@@ -98,7 +108,7 @@ function toggleBot() {
   if (_botOn) scanMarkets();
 }
 
-/* ---- Set Analysis Mode ---- */
+/* ---- Set Trading Mode ---- */
 function setMode(btn, mode) {
   var all = btn.parentElement.querySelectorAll('button');
   all.forEach(function(b){ b.style.background='transparent'; b.style.borderColor='#374151'; b.style.color='#94a3b8'; });
@@ -112,7 +122,7 @@ function analyzeTop15() { scanMarkets(); }
 
 /* ---- Load initial data ---- */
 function _boot() {
-  addLog('Connecting to WeatherEdge API...');
+  addLog('Connecting to WeatherEdge v2 API...');
   fetch(API + '/api/stats')
     .then(function(r){ return r.json(); })
     .then(function(s){
@@ -122,6 +132,13 @@ function _boot() {
       if (ee) ee.textContent = s.edges_found || 0;
       var el = document.getElementById('stat-live');
       if (el) el.textContent = s.live_edges || 0;
+      /* Update model badges */
+      var mb = document.getElementById('model-badges');
+      if (mb && s.models) {
+        mb.innerHTML = s.models.map(function(m){
+          return '<span style="display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:11px;background:#1e293b;color:#22c55e;border:1px solid #22c55e40">' + m + '</span>';
+        }).join('');
+      }
       addLog('Connected - mode: ' + (s.bot_mode || 'PAPER') + ', models: ' + (s.models||[]).join(', '));
     })
     .catch(function(e){ addLog('API connection failed: ' + e.message); });
@@ -159,7 +176,7 @@ function _boot() {
       }
     }).catch(function(){});
 
-  /* Load traders */
+  /* Load traders - API only, no fallback */
   fetch(API + '/api/traders')
     .then(function(r){ return r.json(); })
     .then(function(data){
@@ -177,6 +194,9 @@ function _boot() {
             + '</tr>';
         }).join('');
       }
-    }).catch(function(){});
+    }).catch(function(){
+      var lb = document.getElementById('lb-body');
+      if (lb) lb.innerHTML = '<tr><td colspan="5" style="padding:16px;color:#64748b;text-align:center">Leaderboard unavailable</td></tr>';
+    });
 }
 _boot();
