@@ -239,40 +239,39 @@ setTimeout(function(){
   }
 
   window.loadRainMap = function() {
-    var svg = document.getElementById('weather-map-svg');
-    var status = document.getElementById('map-status');
-    if (!svg) return;
-    drawBase(svg);
-    if (status) status.textContent = 'Loading temperatures for ' + CITIES.length + ' cities...';
-
-    var temps = {};
-    var done = 0;
-    var api = 'https://weatheredge-production.up.railway.app';
-
-    CITIES.forEach(function(c) {
-      var city = c[0].toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,'');
-      fetch(api + '/api/forecast/' + encodeURIComponent(city))
-        .then(function(r){return r.json();})
-        .then(function(d){
-          // temp is in forecast[0].temp_c or similar
-          var t = (d && d.temp_c !== undefined) ? d.temp_c : null;
-          temps[c[0]] = t;
-        })
-        .catch(function(){temps[c[0]]=null;})
-        .finally(function(){
-          done++;
-          if (status) status.textContent = 'Loading... ' + done + '/' + CITIES.length;
-          plotCities(svg, temps);
-          if (done === CITIES.length && status) {
-            status.textContent = 'Live temperatures — ' + new Date().toLocaleTimeString() + ' — ' + done + ' cities';
+      var svg = document.getElementById("weather-map-svg");
+      var status = document.getElementById("map-status");
+      if (!svg) return;
+      drawBase(svg);
+      if (status) status.textContent = "Loading temperatures...";
+      var api = "https://weatheredge-production.up.railway.app";
+      // Single call returns ALL city temps at once
+      fetch(api + "/api/map")
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+          var cities = data.cities || {};
+          var count = Object.keys(cities).length;
+          if (count === 0) {
+            if (status) status.textContent = "Cache warming — check back in 30s";
+            return;
           }
+          // Build temps lookup: {cityName: temp_c}
+          var temps = {};
+          Object.keys(cities).forEach(function(city) {
+            temps[city] = cities[city].temp_c;
+          });
+          plotCities(svg, temps);
+          var time = new Date().toLocaleTimeString();
+          if (status) status.textContent = "Live temperatures — " + time + " — " + count + " cities";
+        })
+        .catch(function(e) {
+          if (status) status.textContent = "API offline — check Railway";
+          // Draw grey dots so map still shows city locations
+          plotCities(svg, {});
         });
-    });
-  };
-
-  // Auto-load when tab opens
-  var origSt = window._st;
-  window._st = function(tab, el) {
+    };
+  
+    window._st = function(tab, el) {
     if (origSt) origSt(tab, el);
     if (tab === 'rainmap') setTimeout(window.loadRainMap, 200);
   };
