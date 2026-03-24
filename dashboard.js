@@ -54,47 +54,44 @@ function scanMarkets() {
       var me = document.getElementById('m-edge');
       if (me) me.textContent = edges.length;
       /* Show edges in analysis panel */
-      var ao = document.getElementById('analysis-output');
-      if (ao && edges.length > 0) {
-        ao.innerHTML = edges.slice(0,15).map(function(e){
-          var ev = e.theoretical_full_ev || e.best_edge || 0;
-          var evPct = (ev * 100).toFixed(1);
-          var color = ev > 0 ? '#22c55e' : '#ef4444';
-          return '<div style="padding:8px 0;border-bottom:1px solid #1e293b;font-size:13px">'
-            + '<b style="color:#e2e8f0">' + (e.question || e.city || 'Market') + '</b><br>'
-            + 'Theo EV: <span style="color:' + color + '">' + evPct + '%</span>'
-            + ' &middot; Side: ' + (e.best_side || '-')
-            + ' &middot; Price: ' + (e.yes_price || '-')
-            + ' &middot; Confidence: ' + ((e.confidence||0)*100).toFixed(0) + '%'
-            + (e.regime ? ' &middot; Regime: ' + e.regime : '')
-            + '</div>';
-        }).join('');
-      } else if (ao) {
-        ao.innerHTML = '<div style="color:#64748b;padding:12px">No edges found in current scan.</div>';
-      }
-      /* Markets list */
-      var ml = document.getElementById('market-list');
-      if (ml && edges.length > 0) {
-        ml.innerHTML = edges.map(function(e){
-          var ev = e.theoretical_full_ev || e.best_edge || 0;
-          return '<tr><td style="padding:6px;color:#e2e8f0">' + (e.question || e.city) + '</td>'
-            + '<td style="padding:6px;color:#22c55e">' + (ev*100).toFixed(1) + '%</td>'
-            + '<td style="padding:6px">' + (e.best_side||'-') + '</td>'
-            + '<td style="padding:6px">' + (e.yes_price||'-') + '</td></tr>';
-        }).join('');
-      }
-      addLog('Scan complete: ' + (data.cache_size||data.count||0) + ' markets, ' + edges.length + ' edges, ' + liveEdges.length + ' live');
-    })
-    .catch(function(err){
-      addLog('Scan error: ' + err.message);
-      var ao = document.getElementById('analysis-output');
-      if (ao) ao.innerHTML = '<div style="color:#ef4444;padding:12px">Scan failed: ' + err.message + '</div>';
-    })
-    .finally(function(){
-      var btn = document.querySelector('[onclick="scanMarkets()"]');
-      if (btn) btn.innerHTML = '&#128269; Scan Markets';
-    });
-}
+  var ao = document.getElementById('analysis-output');
+  if(ao && edges.length) {
+    ao.innerHTML = edges.slice(0,15).map(function(e) {
+      var tp = _getTokenPrices(e);
+      var yesP = tp.yes ? (tp.yes * 100).toFixed(1) : '-';
+      var noP = tp.no ? (tp.no * 100).toFixed(1) : '-';
+      var title = _parseSlug(e.slug) || e.question || e.city || 'Market';
+      var city = e.city || '';
+      var cat = e.category || e.regime || '';
+      var catLabel = cat === 'high_temp' ? 'HIGH TEMP' : cat === 'low_temp' ? 'LOW TEMP' : cat.toUpperCase();
+      var catColor = cat === 'high_temp' ? '#ef4444' : cat === 'low_temp' ? '#3b82f6' : '#f59e0b';
+      var side = (tp.yes < 0.5) ? 'YES' : 'NO';
+      var sideColor = side === 'YES' ? '#10b981' : '#ef4444';
+      var edge = Math.abs(0.5 - tp.yes) * 100;
+      var edgePct = edge.toFixed(1);
+      var endDate = _fmtDate(e.end_date_iso || e.end_date);
+      return '<div style="padding:10px 14px;border-bottom:1px solid #1e293b;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px">' +
+        '<div>' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">' +
+            '<b style="color:#e2e8f0;font-size:14px">' + city + '</b>' +
+            '<span style="background:' + catColor + ';color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600">' + catLabel + '</span>' +
+            (endDate ? '<span style="color:#64748b;font-size:11px">' + endDate + '</span>' : '') +
+          '</div>' +
+          '<div style="color:#94a3b8;font-size:12px">' + title + '</div>' +
+        '</div>' +
+        '<div style="text-align:right;white-space:nowrap">' +
+          '<span style="color:#94a3b8;font-size:10px">YES</span> ' +
+          '<span style="color:#10b981;font-size:15px;font-weight:600">' + yesP + '\u00A2</span>' +
+          '<span style="color:#334155;margin:0 4px">|</span>' +
+          '<span style="color:#94a3b8;font-size:10px">NO</span> ' +
+          '<span style="color:#ef4444;font-size:15px;font-weight:600">' + noP + '\u00A2</span>' +
+          '<div style="font-size:10px;color:' + sideColor + '">' + side + ' ' + edgePct + '% edge</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } else if(ao) {
+    ao.innerHTML = '<div style="color:#6b7b8d;padding:16px">No edges found in current scan</div>';
+  }
 
 /* ---- Toggle Bot ---- */
 var _botOn = false;
@@ -182,6 +179,43 @@ _boot();
 // ============================================================
 // Live Signals - Real API Data
 // ============================================================
+
+
+/* Global helpers shared by scanMarkets and populateSignals */
+function _parseSlug(slug) {
+  if(!slug) return '';
+  var s = slug.replace(/-/g, ' ');
+  s = s.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+  s = s.replace(/Highest Temperature In /i, 'High Temp ');
+  s = s.replace(/Lowest Temperature In /i, 'Low Temp ');
+  s = s.replace(/ On /, ' \u00B7 ');
+  s = s.replace(/(\d+)forabove/i, '\u2265$1\u00B0F');
+  s = s.replace(/(\d+)forbelow/i, '\u2264$1\u00B0F');
+  s = s.replace(/(\d+)corhigher/i, '\u2265$1\u00B0C');
+  s = s.replace(/(\d+)corbelow/i, '\u2264$1\u00B0C');
+  s = s.replace(/(\d+)c(?:\s|$)/i, '$1\u00B0C ');
+  s = s.replace(/(\d+)f(?:\s|$)/i, '$1\u00B0F ');
+  return s;
+}
+function _getTokenPrices(m) {
+  var yes = 0, no = 0;
+  if(m.tokens && m.tokens.length) {
+    m.tokens.forEach(function(t) {
+      var p = parseFloat(t.price) || 0;
+      if(t.outcome === 'Yes') yes = p;
+      if(t.outcome === 'No') no = p;
+    });
+  }
+  return {yes: yes, no: no};
+}
+function _fmtDate(d) {
+  if(!d) return '';
+  try {
+    var dt = new Date(d);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[dt.getMonth()] + ' ' + dt.getDate();
+  } catch(e) { return ''; }
+}
 
 function populateSignals(markets) {
   var sigCount = document.getElementById("sig-count");
