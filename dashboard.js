@@ -177,3 +177,135 @@ function _boot(){
   if(lb) lb.innerHTML='<tr><td colspan="4">Leaderboard not available in v2</td></tr>';
 }
 _boot();
+
+
+// ============================================================
+// Live Signals - Real API Data
+// ============================================================
+
+function populateSignals(markets) {
+  // Update signal stats
+  var sigCount = document.getElementById('sig-count');
+  var sigAvg   = document.getElementById('sig-avg-ev');
+  var sigHigh  = document.getElementById('sig-high');
+  var sigMkts  = document.getElementById('sig-markets');
+  var sigList  = document.getElementById('signals-list');
+  var badge    = document.getElementById('signals-scan-badge');
+
+  if (sigCount) sigCount.textContent = markets.length;
+  if (sigMkts)  sigMkts.textContent  = markets.length;
+  if (badge)    badge.textContent     = 'LIVE';
+  if (badge)    badge.style.background = '#10b981';
+
+  // Calculate average "edge" from prices
+  var totalEdge = 0;
+  var bestEdge  = 0;
+  markets.forEach(function(m) {
+    var prices = m.prices || {};
+    var vals = Object.values(prices);
+    // Edge = how far from 0.5 the best price is
+    var edge = 0;
+    vals.forEach(function(v) {
+      var e = Math.abs(v - 0.5);
+      if (e > edge) edge = e;
+    });
+    totalEdge += edge;
+    if (edge > bestEdge) bestEdge = edge;
+  });
+  var avgEdge = markets.length > 0 ? (totalEdge / markets.length * 100).toFixed(1) : '0';
+  if (sigAvg)  sigAvg.textContent  = avgEdge + '%';
+  if (sigHigh) sigHigh.textContent = (bestEdge * 100).toFixed(1) + '%';
+
+  // Populate signals list
+  if (!sigList) return;
+  if (markets.length === 0) {
+    sigList.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8">No signals found. Run a scan first.</div>';
+    return;
+  }
+
+  var html = '';
+  var shown = markets.slice(0, 50);
+  shown.forEach(function(m) {
+    var city = m.city || m.slug || '?';
+    var station = m.station || '';
+    var cat = m.category || '';
+    var catLabel = cat === 'high_temp' ? 'HIGH' : cat === 'low_temp' ? 'LOW' : cat.toUpperCase();
+    var catColor = cat === 'high_temp' ? '#ef4444' : '#3b82f6';
+
+    // Find best YES price
+    var yesPrice = '-';
+    var noPrice  = '-';
+    if (m.tokens && m.tokens.length >= 2) {
+      m.tokens.forEach(function(t) {
+        if (t.outcome === 'Yes') yesPrice = (parseFloat(t.price) * 100).toFixed(1) + 'c';
+        if (t.outcome === 'No')  noPrice  = (parseFloat(t.price) * 100).toFixed(1) + 'c';
+      });
+    }
+    var conf = m.confidence || 0;
+    var confBar = Math.min(conf, 5);
+    var confDots = '';
+    for (var i = 0; i < 5; i++) {
+      confDots += '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 1px;background:' + (i < confBar ? '#10b981' : '#334155') + '"></span>';
+    }
+
+    html += '<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center">';
+    html += '  <div style="flex:1">';
+    html += '    <div style="font-weight:600;color:#f1f5f9;font-size:0.95rem">' + city + '</div>';
+    html += '    <div style="color:#94a3b8;font-size:0.8rem">' + station + ' &middot; <span style="color:' + catColor + '">' + catLabel + '</span></div>';
+    html += '  </div>';
+    html += '  <div style="text-align:center;min-width:80px">';
+    html += '    <div style="color:#10b981;font-weight:700;font-size:1.1rem">YES ' + yesPrice + '</div>';
+    html += '    <div style="color:#ef4444;font-size:0.85rem">NO ' + noPrice + '</div>';
+    html += '  </div>';
+    html += '  <div style="text-align:right;min-width:70px">';
+    html += '    <div style="margin-bottom:4px">' + confDots + '</div>';
+    html += '    <div style="color:#64748b;font-size:0.7rem">conf ' + conf + '/5</div>';
+    html += '  </div>';
+    html += '</div>';
+  });
+
+  sigList.innerHTML = html;
+}
+
+// Auto-fetch signals when page loads and after each scan
+(function() {
+  // Wrap existing scanMarkets to also populate signals
+  var _origScan = window.scanMarkets;
+  window.scanMarkets = function() {
+    var btn = document.querySelector('[onclick*="scanMarkets"]');
+    if (btn) btn.disabled = true;
+
+    fetch(API + '/api/scan', {method: 'POST'})
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        // Call original scan UI updates
+        if (_origScan) {
+          try { _origScan(); } catch(e) {}
+        }
+        // Populate signals with real data
+        if (data.markets) {
+          populateSignals(data.markets);
+        }
+        // Update main stats too
+        var el = document.getElementById('stat-markets');
+        if (el) el.textContent = (data.weather_markets || data.total_markets || 0);
+      })
+      .catch(function(err) {
+        console.error('Scan error:', err);
+      })
+      .finally(function() {
+        var btn = document.querySelector('[onclick*="scanMarkets"]');
+        if (btn) btn.disabled = false;
+      });
+  };
+
+  // Auto-scan on load
+  setTimeout(function() {
+    fetch(API + '/api/scan', {method: 'POST'})
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.markets) populateSignals(data.markets);
+      })
+      .catch(function(e) { console.log('Auto-scan failed:', e); });
+  }, 2000);
+})();
