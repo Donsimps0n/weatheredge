@@ -1,3 +1,7 @@
+
+// Alias for sidebar tab switching - triggers fresh scan
+function loadSignals() { scanMarkets(); }
+
 /* ===== WeatherEdge v2 Dashboard Logic ===== */
 /* Change this URL when v2 API is deployed */
 const API = 'https://weatheredge-bot-v2-production.up.railway.app';
@@ -126,11 +130,7 @@ function toggleBot(){
     bt.style.background='linear-gradient(135deg,#ef4444,#dc2626)';
     addLog('Bot started - scanning every 60s');
     scanMarkets();
-    window._botInterval=setInterval
-// Alias for sidebar tab switching - triggers a fresh scan to populate signals
-function loadSignals() { scanMarkets(); }
-
-(function(){ scanMarkets(); },60000);
+    window._botInterval=setInterval(function(){ scanMarkets(); },60000);
   } else {
     tx.textContent='Start Bot';
     bt.style.background='linear-gradient(135deg,#22c55e,#16a34a)';
