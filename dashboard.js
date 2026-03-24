@@ -92,6 +92,29 @@ function scanMarkets() {
   } else if(ao) {
     ao.innerHTML = '<div style="color:#6b7b8d;padding:16px">No edges found in current scan</div>';
   }
+      /* Markets list */
+      var ml = document.getElementById('market-list');
+      if (ml && edges.length > 0) {
+        ml.innerHTML = edges.map(function(e){
+          var ev = e.theoretical_full_ev || e.best_edge || 0;
+          return '<tr><td style="padding:6px;color:#e2e8f0">' + (e.question || e.city) + '</td>'
+            + '<td style="padding:6px;color:#22c55e">' + (ev*100).toFixed(1) + '%</td>'
+            + '<td style="padding:6px">' + (e.best_side||'-') + '</td>'
+            + '<td style="padding:6px">' + (e.yes_price||'-') + '</td></tr>';
+        }).join('');
+      }
+      addLog('Scan complete: ' + (data.cache_size||data.count||0) + ' markets, ' + edges.length + ' edges, ' + liveEdges.length + ' live');
+    })
+    .catch(function(err){
+      addLog('Scan error: ' + err.message);
+      var ao = document.getElementById('analysis-output');
+      if (ao) ao.innerHTML = '<div style="color:#ef4444;padding:12px">Scan failed: ' + err.message + '</div>';
+    })
+    .finally(function(){
+      var btn = document.querySelector('[onclick="scanMarkets()"]');
+      if (btn) btn.innerHTML = '&#128269; Scan Markets';
+    });
+}
 
 /* ---- Toggle Bot ---- */
 var _botOn = false;
@@ -181,7 +204,7 @@ _boot();
 // ============================================================
 
 
-/* Global helpers shared by scanMarkets and populateSignals */
+/* Global helpers shared by scanMarkets edge display and populateSignals */
 function _parseSlug(slug) {
   if(!slug) return '';
   var s = slug.replace(/-/g, ' ');
