@@ -184,88 +184,122 @@ _boot();
 // ============================================================
 
 function populateSignals(markets) {
-  // Update signal stats
-  var sigCount = document.getElementById('sig-count');
-  var sigAvg   = document.getElementById('sig-avg-ev');
-  var sigHigh  = document.getElementById('sig-high');
-  var sigMkts  = document.getElementById('sig-markets');
-  var sigList  = document.getElementById('signals-list');
-  var badge    = document.getElementById('signals-scan-badge');
+  var sigCount = document.getElementById("sig-count");
+  var sigAvg = document.getElementById("sig-avg-ev");
+  var sigHigh = document.getElementById("sig-high");
+  var sigMkts = document.getElementById("sig-markets");
+  var sigList = document.getElementById("signals-list");
+  var badge = document.getElementById("signals-scan-badge");
 
   if (sigCount) sigCount.textContent = markets.length;
-  if (sigMkts)  sigMkts.textContent  = markets.length;
-  if (badge)    badge.textContent     = 'LIVE';
-  if (badge)    badge.style.background = '#10b981';
+  if (sigMkts) sigMkts.textContent = markets.length;
+  if (badge) { badge.textContent = "LIVE"; badge.style.background = "#10b981"; }
 
-  // Calculate average "edge" from prices
-  var totalEdge = 0;
-  var bestEdge  = 0;
+  function parseSlug(slug) {
+    if (!slug) return "";
+    var s = slug.replace(/-/g, " ");
+    s = s.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+    s = s.replace(/Highest Temperature In /i, "High Temp ");
+    s = s.replace(/Lowest Temperature In /i, "Low Temp ");
+    s = s.replace(/ On /, " \u00B7 ");
+    s = s.replace(/(\d+)corhigher$/i, "\u2265$1\u00B0C");
+    s = s.replace(/(\d+)corbelow$/i, "\u2264$1\u00B0C");
+    s = s.replace(/ (\d+)c$/i, " $1\u00B0C");
+    return s;
+  }
+
+  function getTokenPrices(m) {
+    var yes = 0, no = 0;
+    if (m.tokens && m.tokens.length >= 2) {
+      m.tokens.forEach(function(t) {
+        var p = parseFloat(t.price) || 0;
+        if (t.outcome === "Yes") yes = p;
+        if (t.outcome === "No") no = p;
+      });
+    }
+    return { yes: yes, no: no };
+  }
+
+  function fmtDate(d) {
+    if (!d) return "";
+    try {
+      var dt = new Date(d);
+      var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      return months[dt.getMonth()] + " " + dt.getDate();
+    } catch(e) { return ""; }
+  }
+
+  var totalEdge = 0, bestEdge = 0;
   markets.forEach(function(m) {
-    var prices = m.prices || {};
-    var vals = Object.values(prices);
-    // Edge = how far from 0.5 the best price is
-    var edge = 0;
-    vals.forEach(function(v) {
-      var e = Math.abs(v - 0.5);
-      if (e > edge) edge = e;
-    });
+    var tp = getTokenPrices(m);
+    var edge = Math.abs(tp.yes - 0.5);
     totalEdge += edge;
     if (edge > bestEdge) bestEdge = edge;
   });
-  var avgEdge = markets.length > 0 ? (totalEdge / markets.length * 100).toFixed(1) : '0';
-  if (sigAvg)  sigAvg.textContent  = avgEdge + '%';
-  if (sigHigh) sigHigh.textContent = (bestEdge * 100).toFixed(1) + '%';
+  var avgEdge = markets.length > 0 ? (totalEdge / markets.length * 100).toFixed(1) : "0";
+  if (sigAvg) sigAvg.textContent = avgEdge + "%";
+  if (sigHigh) sigHigh.textContent = (bestEdge * 100).toFixed(1) + "%";
 
-  // Populate signals list
   if (!sigList) return;
   if (markets.length === 0) {
     sigList.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8">No signals found. Run a scan first.</div>';
     return;
   }
 
-  var html = '';
-  var shown = markets.slice(0, 50);
-  shown.forEach(function(m) {
-    var city = m.city || m.slug || '?';
-    var station = m.station || '';
-    var cat = m.category || '';
-    var catLabel = cat === 'high_temp' ? 'HIGH' : cat === 'low_temp' ? 'LOW' : cat.toUpperCase();
-    var catColor = cat === 'high_temp' ? '#ef4444' : '#3b82f6';
-
-    // Find best YES price
-    var yesPrice = '-';
-    var noPrice  = '-';
-    if (m.tokens && m.tokens.length >= 2) {
-      m.tokens.forEach(function(t) {
-        if (t.outcome === 'Yes') yesPrice = (parseFloat(t.price) * 100).toFixed(1) + 'c';
-        if (t.outcome === 'No')  noPrice  = (parseFloat(t.price) * 100).toFixed(1) + 'c';
-      });
-    }
+  var html = "";
+  markets.slice(0, 50).forEach(function(m) {
+    var city = m.city || "?";
+    var station = m.station || "";
+    var cat = m.category || "";
+    var catLabel = cat === "high_temp" ? "HIGH TEMP" : cat === "low_temp" ? "LOW TEMP" : cat.toUpperCase();
+    var catColor = cat === "high_temp" ? "#ef4444" : cat === "low_temp" ? "#3b82f6" : "#f59e0b";
+    var catBg = cat === "high_temp" ? "rgba(239,68,68,0.15)" : cat === "low_temp" ? "rgba(59,130,246,0.15)" : "rgba(245,158,11,0.15)";
+    var tp = getTokenPrices(m);
+    var yesPrice = tp.yes > 0 ? (tp.yes * 100).toFixed(1) + "\u00A2" : "--";
+    var noPrice = tp.no > 0 ? (tp.no * 100).toFixed(1) + "\u00A2" : "--";
+    var title = parseSlug(m.slug);
+    var endDate = fmtDate(m.end_date);
     var conf = m.confidence || 0;
     var confBar = Math.min(conf, 5);
-    var confDots = '';
+    var confDots = "";
     for (var i = 0; i < 5; i++) {
-      confDots += '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 1px;background:' + (i < confBar ? '#10b981' : '#334155') + '"></span>';
+      confDots += '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 1px;background:' + (i < confBar ? "#10b981" : "#334155") + '"></span>';
     }
+    var side = tp.yes < 0.5 ? "YES" : "NO";
+    var sideColor = side === "YES" ? "#10b981" : "#ef4444";
+    var edge = Math.abs(tp.yes - 0.5);
+    var edgePct = (edge * 100).toFixed(1);
 
-    html += '<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center">';
-    html += '  <div style="flex:1">';
-    html += '    <div style="font-weight:600;color:#f1f5f9;font-size:0.95rem">' + city + '</div>';
-    html += '    <div style="color:#94a3b8;font-size:0.8rem">' + station + ' &middot; <span style="color:' + catColor + '">' + catLabel + '</span></div>';
-    html += '  </div>';
-    html += '  <div style="text-align:center;min-width:80px">';
-    html += '    <div style="color:#10b981;font-weight:700;font-size:1.1rem">YES ' + yesPrice + '</div>';
-    html += '    <div style="color:#ef4444;font-size:0.85rem">NO ' + noPrice + '</div>';
-    html += '  </div>';
-    html += '  <div style="text-align:right;min-width:70px">';
-    html += '    <div style="margin-bottom:4px">' + confDots + '</div>';
-    html += '    <div style="color:#64748b;font-size:0.7rem">conf ' + conf + '/5</div>';
-    html += '  </div>';
+    html += '<div class="signal-card" data-side="' + side + '" data-conf="' + conf + '" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-left:3px solid ' + catColor + ';border-radius:12px;padding:0.85rem 1rem;margin-bottom:0.6rem;display:grid;grid-template-columns:1fr auto auto;gap:0.75rem;align-items:center">';
+    html += '<div style="min-width:0">';
+    html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">';
+    html += '<span style="font-weight:700;color:#f1f5f9;font-size:0.95rem">' + city + '</span>';
+    html += '<span style="background:' + catBg + ';color:' + catColor + ';font-size:0.65rem;padding:2px 6px;border-radius:4px;font-weight:600">' + catLabel + '</span>';
+    if (endDate) html += '<span style="color:#64748b;font-size:0.7rem">' + endDate + '</span>';
+    html += '</div>';
+    html += '<div style="color:#94a3b8;font-size:0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + (m.slug || "") + '">' + (title || station) + '</div>';
+    html += '</div>';
+
+    html += '<div style="text-align:center;min-width:90px">';
+    html += '<div style="display:flex;gap:8px;justify-content:center">';
+    html += '<div><div style="color:#64748b;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.5px">Yes</div><div style="color:#10b981;font-weight:700;font-size:1rem">' + yesPrice + '</div></div>';
+    html += '<div style="width:1px;background:#334155"></div>';
+    html += '<div><div style="color:#64748b;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.5px">No</div><div style="color:#ef4444;font-weight:700;font-size:1rem">' + noPrice + '</div></div>';
+    html += '</div>';
+    html += '<div style="color:' + sideColor + ';font-size:0.65rem;font-weight:600;margin-top:2px">' + side + " " + edgePct + '% edge</div>';
+    html += '</div>';
+
+    html += '<div style="text-align:right;min-width:60px">';
+    html += '<div style="margin-bottom:3px">' + confDots + '</div>';
+    html += '<div style="color:#64748b;font-size:0.65rem">' + conf + '/5 conf</div>';
+    html += '</div>';
     html += '</div>';
   });
 
   sigList.innerHTML = html;
+  window._signalMarkets = markets;
 }
+
 
 // Auto-fetch signals when page loads and after each scan
 // Auto-scan on page load - populates Live Signals with real API data
