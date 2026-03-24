@@ -268,44 +268,46 @@ function populateSignals(markets) {
 }
 
 // Auto-fetch signals when page loads and after each scan
+// Auto-scan on page load - populates Live Signals with real API data
 (function() {
-  // Wrap existing scanMarkets to also populate signals
+  // Wrap scanMarkets button to also populate signals
   var _origScan = window.scanMarkets;
   window.scanMarkets = function() {
-    var btn = document.querySelector('[onclick*="scanMarkets"]');
-    if (btn) btn.disabled = true;
-
-    fetch(API + '/api/scan', {method: 'POST'})
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        // Call original scan UI updates
-        if (_origScan) {
-          try { _origScan(); } catch(e) {}
-        }
-        // Populate signals with real data
-        if (data.markets) {
-          populateSignals(data.markets);
-        }
-        // Update main stats too
-        var el = document.getElementById('stat-markets');
-        if (el) el.textContent = (data.weather_markets || data.total_markets || 0);
-      })
-      .catch(function(err) {
-        console.error('Scan error:', err);
-      })
-      .finally(function() {
-        var btn = document.querySelector('[onclick*="scanMarkets"]');
-        if (btn) btn.disabled = false;
-      });
+    if (_origScan) _origScan();
+    setTimeout(function() {
+      fetch(API + "/api/scan", {method: "POST"})
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.markets && data.markets.length > 0) populateSignals(data.markets);
+        })
+        .catch(function(e) { console.log("[WE] Scan populate error:", e); });
+    }, 500);
   };
 
-  // Auto-scan on load
-  setTimeout(function() {
-    fetch(API + '/api/scan', {method: 'POST'})
+  function autoScan() {
+    console.log("[WE] Auto-scan starting...");
+    var badge = document.getElementById("signals-scan-badge");
+    if (badge) { badge.textContent = "SCANNING..."; badge.style.background = "#64748b"; }
+    fetch(API + "/api/scan", {method: "POST"})
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        if (data.markets) populateSignals(data.markets);
+        console.log("[WE] Auto-scan got " + (data.markets ? data.markets.length : 0) + " markets");
+        if (data.markets && data.markets.length > 0) {
+          populateSignals(data.markets);
+        } else {
+          if (badge) { badge.textContent = "NO DATA"; badge.style.background = "#ef4444"; }
+        }
       })
-      .catch(function(e) { console.log('Auto-scan failed:', e); });
-  }, 2000);
+      .catch(function(e) {
+        console.log("[WE] Auto-scan failed:", e);
+        if (badge) { badge.textContent = "ERROR"; badge.style.background = "#ef4444"; }
+      });
+  }
+
+  // Use window.onload to ensure all scripts are ready
+  if (document.readyState === "complete") {
+    setTimeout(autoScan, 1500);
+  } else {
+    window.addEventListener("load", function() { setTimeout(autoScan, 1500); });
+  }
 })();
