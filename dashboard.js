@@ -245,120 +245,218 @@ function _fmtDate(d) {
 }
 
 function populateSignals(markets) {
-  var sigCount = document.getElementById("sig-count");
-  var sigAvg = document.getElementById("sig-avg-ev");
-  var sigHigh = document.getElementById("sig-high");
-  var sigMkts = document.getElementById("sig-markets");
-  var sigList = document.getElementById("signals-list");
-  var badge = document.getElementById("signals-scan-badge");
+  var sigCount = document.getElementById('sig-count');
+  var sigAvg = document.getElementById('sig-avg-ev');
+  var sigHigh = document.getElementById('sig-high');
+  var sigMkts = document.getElementById('sig-markets');
+  var sigList = document.getElementById('signals-list');
+  var badge = document.getElementById('signals-scan-badge');
 
+  // --- Compute real stats from token prices ---
+  var totalEdge = 0;
+  var maxEdge = 0;
+  var highAgreement = 0;
+  markets.forEach(function(m) {
+    var p = _getTokenPrices(m);
+    var yesEdge = (0.5 - p.yes) * 100;
+    var noEdge = (0.5 - p.no) * 100;
+    var edge = Math.max(yesEdge, noEdge);
+    if (edge < 0) edge = 0;
+    totalEdge += edge;
+    if (edge > maxEdge) maxEdge = edge;
+    if (m.confidence >= 3) highAgreement++;
+  });
+  var avgEdge = markets.length > 0 ? totalEdge / markets.length : 0;
+
+  // --- Update stat cards ---
   if (sigCount) sigCount.textContent = markets.length;
   if (sigMkts) sigMkts.textContent = markets.length;
-  if (badge) { badge.textContent = "LIVE"; badge.style.background = "#10b981"; }
+  if (sigAvg) sigAvg.textContent = '+' + avgEdge.toFixed(1) + '%';
+  if (sigHigh) sigHigh.textContent = 'HIGH';
+  if (badge) { badge.textContent = '\u25CF SCANNING LIVE'; badge.style.background = '#166534'; badge.style.color = '#4ade80'; badge.style.border = '1px solid #22c55e44'; badge.style.padding = '4px 12px'; badge.style.borderRadius = '20px'; badge.style.fontSize = '11px'; badge.style.fontWeight = '700'; badge.style.letterSpacing = '0.04em'; }
 
-  function parseSlug(slug) {
-    if (!slug) return "";
-    var s = slug.replace(/-/g, " ");
-    s = s.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
-    s = s.replace(/Highest Temperature In /i, "High Temp ");
-    s = s.replace(/Lowest Temperature In /i, "Low Temp ");
-    s = s.replace(/ On /, " \u00B7 ");
-        s = s.replace(/(\d+)forabove$/i, "\u2265$1\u00B0F");
-    s = s.replace(/(\d+)forbelow$/i, "\u2264$1\u00B0F");
-    s = s.replace(/(\d+)corhigher$/i, "\u2265$1\u00B0C");
-    s = s.replace(/(\d+)corbelow$/i, "\u2264$1\u00B0C");
-    s = s.replace(/ (\d+)c$/i, " $1\u00B0C");
-    s = s.replace(/ (\d+)f$/i, " $1\u00B0F");
+  // --- Helper: time remaining ---
+  function timeLeft(endDate) {
+    if (!endDate) return '';
+    try {
+      var end = new Date(endDate);
+      var now = new Date();
+      var diff = end - now;
+      if (diff <= 0) return 'Closed';
+      var hrs = Math.floor(diff / 3600000);
+      if (hrs >= 24) return Math.floor(hrs / 24) + 'd ' + (hrs % 24) + 'h';
+      return hrs + 'h';
+    } catch(e) { return ''; }
+  }
+
+  // --- Helper: build Polymarket URL from slug ---
+  function polyUrl(slug) {
+    return 'https://polymarket.com/event/' + (slug || '');
+  }
+
+  // --- Helper: category label ---
+  function catLabel(cat) {
+    if (!cat) return 'WEATHER';
+    if (cat === 'high_temp') return 'HIGH TEMP';
+    if (cat === 'low_temp') return 'LOW TEMP';
+    if (cat === 'precipitation') return 'PRECIP';
+    return cat.toUpperCase().replace(/_/g, ' ');
+  }
+
+  // --- Helper: category color ---
+  function catColor(cat) {
+    if (cat === 'high_temp') return '#dc2626';
+    if (cat === 'low_temp') return '#2563eb';
+    if (cat === 'precipitation') return '#0891b2';
+    return '#7c3aed';
+  }
+
+  // --- Helper: generate full market question from slug ---
+  function buildQuestion(m) {
+    if (!m.slug) return '';
+    var s = m.slug.replace(/-/g, ' ');
+    // Capitalize first letter of each word
+    s = s.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    // Convert to question form
+    s = s.replace(/^Highest Temperature In /i, 'Will the highest temperature in ');
+    s = s.replace(/^Lowest Temperature In /i, 'Will the lowest temperature in ');
+    // Handle temperature thresholds
+    s = s.replace(/(\d+)forabove/i, '$1\u00B0F or higher');
+    s = s.replace(/(\d+)forbelow/i, 'below $1\u00B0F');
+    s = s.replace(/(\d+)corhigher/i, '$1\u00B0C or higher');
+    s = s.replace(/(\d+)corbelow/i, 'below $1\u00B0C');
+    s = s.replace(/(\d+)c(?:\s|$)/i, '$1\u00B0C ');
+    s = s.replace(/(\d+)f(?:\s|$)/i, '$1\u00B0F ');
+    // Add question mark
+    if (s.indexOf('Will') === 0 && s.indexOf('?') < 0) {
+      // Find the date part: "On March 25 2026"
+      s = s.replace(/ On (.*?)(\d{4})\s*(.*)/i, ' on $1$2 be $3?');
+      if (s.indexOf('?') < 0) s += '?';
+    }
     return s;
   }
 
-  function getTokenPrices(m) {
-    var yes = 0, no = 0;
-    if (m.tokens && m.tokens.length >= 2) {
-      m.tokens.forEach(function(t) {
-        var p = parseFloat(t.price) || 0;
-        if (t.outcome === "Yes") yes = p;
-        if (t.outcome === "No") no = p;
-      });
+  // --- Build elite signal cards ---
+  var html = '';
+  markets.forEach(function(m, idx) {
+    var p = _getTokenPrices(m);
+    var yesPrice = p.yes;
+    var noPrice = p.no;
+    var yesCents = (yesPrice * 100).toFixed(1);
+    var noCents = (noPrice * 100).toFixed(1);
+
+    // Determine edge and side
+    var yesEdge = (0.5 - yesPrice) * 100;
+    var noEdge = (0.5 - noPrice) * 100;
+    var side, edge, sidePrice;
+    if (yesEdge >= noEdge) {
+      side = 'YES'; edge = yesEdge; sidePrice = yesPrice;
+    } else {
+      side = 'NO'; edge = noEdge; sidePrice = noPrice;
     }
-    return { yes: yes, no: no };
-  }
+    if (edge < 0) edge = 0;
+    var theoEv = edge;
 
-  function fmtDate(d) {
-    if (!d) return "";
-    try {
-      var dt = new Date(d);
-      var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      return months[dt.getMonth()] + " " + dt.getDate();
-    } catch(e) { return ""; }
-  }
-
-  var totalEdge = 0, bestEdge = 0;
-  markets.forEach(function(m) {
-    var tp = getTokenPrices(m);
-    var edge = Math.abs(tp.yes - 0.5);
-    totalEdge += edge;
-    if (edge > bestEdge) bestEdge = edge;
-  });
-  var avgEdge = markets.length > 0 ? (totalEdge / markets.length * 100).toFixed(1) : "0";
-  if (sigAvg) sigAvg.textContent = avgEdge + "%";
-  if (sigHigh) sigHigh.textContent = (bestEdge * 100).toFixed(1) + "%";
-
-  if (!sigList) return;
-  if (markets.length === 0) {
-    sigList.innerHTML = '<div style="text-align:center;padding:2rem;color:#94a3b8">No signals found. Run a scan first.</div>';
-    return;
-  }
-
-  var html = "";
-  markets.slice(0, 50).forEach(function(m) {
-    var city = m.city || "?";
-    var station = m.station || "";
-    var cat = m.category || "";
-    var catLabel = cat === "high_temp" ? "HIGH TEMP" : cat === "low_temp" ? "LOW TEMP" : cat.toUpperCase();
-    var catColor = cat === "high_temp" ? "#ef4444" : cat === "low_temp" ? "#3b82f6" : "#f59e0b";
-    var catBg = cat === "high_temp" ? "rgba(239,68,68,0.15)" : cat === "low_temp" ? "rgba(59,130,246,0.15)" : "rgba(245,158,11,0.15)";
-    var tp = getTokenPrices(m);
-    var yesPrice = tp.yes > 0 ? (tp.yes * 100).toFixed(1) + "\u00A2" : "--";
-    var noPrice = tp.no > 0 ? (tp.no * 100).toFixed(1) + "\u00A2" : "--";
-    var title = parseSlug(m.slug);
-    var endDate = fmtDate(m.end_date);
-    var conf = m.confidence || 0;
-    var confBar = Math.min(conf, 5);
-    var confDots = "";
-    for (var i = 0; i < 5; i++) {
-      confDots += '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 1px;background:' + (i < confBar ? "#10b981" : "#334155") + '"></span>';
+    // Kelly stake (fractional kelly 0.25)
+    var kellyFrac = 0;
+    if (sidePrice > 0 && sidePrice < 1) {
+      var impliedProb = sidePrice;
+      var ourProb = impliedProb + (edge / 100);
+      if (ourProb > 0.99) ourProb = 0.99;
+      var odds = (1 / sidePrice) - 1;
+      if (odds > 0) {
+        kellyFrac = ((ourProb * odds) - (1 - ourProb)) / odds;
+        if (kellyFrac < 0) kellyFrac = 0;
+        kellyFrac = kellyFrac * 0.25; // quarter kelly
+      }
     }
-    var side = tp.yes < 0.5 ? "YES" : "NO";
-    var sideColor = side === "YES" ? "#10b981" : "#ef4444";
-    var edge = Math.abs(tp.yes - 0.5);
-    var edgePct = (edge * 100).toFixed(1);
+    var kellyPct = (kellyFrac * 100).toFixed(1);
+    var kellyOn1k = Math.round(kellyFrac * 1000);
 
-    html += '<div class="signal-card" data-side="' + side + '" data-conf="' + conf + '" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-left:3px solid ' + catColor + ';border-radius:12px;padding:0.85rem 1rem;margin-bottom:0.6rem;display:grid;grid-template-columns:1fr auto auto;gap:0.75rem;align-items:center">';
-    html += '<div style="min-width:0">';
-    html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">';
-    html += '<span style="font-weight:700;color:#f1f5f9;font-size:0.95rem">' + city + '</span>';
-    html += '<span style="background:' + catBg + ';color:' + catColor + ';font-size:0.65rem;padding:2px 6px;border-radius:4px;font-weight:600">' + catLabel + '</span>';
-    if (endDate) html += '<span style="color:#64748b;font-size:0.7rem">' + endDate + '</span>';
-    html += '</div>';
-    html += '<div style="color:#94a3b8;font-size:0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + (m.slug || "") + '">' + (title || station) + '</div>';
+    // Probability estimate
+    var ourProb = Math.min(99, Math.round((sidePrice + edge / 100) * 100));
+
+    // Model agreement from confidence
+    var confPct = m.confidence ? Math.round((m.confidence / 5) * 100) : 60;
+    var confLabel = confPct >= 80 ? 'VERY HIGH' : confPct >= 60 ? 'HIGH' : confPct >= 40 ? 'MODERATE' : 'LOW';
+    var confColor = confPct >= 80 ? '#22c55e' : confPct >= 60 ? '#eab308' : confPct >= 40 ? '#f97316' : '#ef4444';
+
+    // Edge color
+    var edgeColor = theoEv >= 40 ? '#22c55e' : theoEv >= 15 ? '#22c55e' : theoEv >= 5 ? '#eab308' : '#f97316';
+
+    // Time left
+    var tl = timeLeft(m.end_date);
+
+    // Category
+    var cl = catLabel(m.category);
+    var cc = catColor(m.category);
+
+    // Question
+    var question = buildQuestion(m);
+
+    // Side badge
+    var sideBadge = side === 'YES'
+      ? '<span style="display:inline-flex;align-items:center;gap:4px;background:#14532d;color:#4ade80;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:0.04em;">\u2191 BUY YES</span>'
+      : '<span style="display:inline-flex;align-items:center;gap:4px;background:#7f1d1d;color:#fca5a5;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:0.04em;">\u2193 BUY NO</span>';
+
+    html += '<div style="background:linear-gradient(135deg,#0f172a 0%,#1a2332 100%);border:1px solid #1e3a5f;border-radius:12px;padding:18px 22px;margin-bottom:10px;transition:border-color 0.2s,box-shadow 0.2s;" onmouseenter="this.style.borderColor=\'#3b82f6\';this.style.boxShadow=\'0 0 24px rgba(59,130,246,0.12)\';" onmouseleave="this.style.borderColor=\'#1e3a5f\';this.style.boxShadow=\'none\';">';
+
+    // Row 1: Side badge + Theo EV
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">';
+    html += sideBadge;
+    html += '<div style="text-align:right;"><span style="font-size:24px;font-weight:800;color:' + edgeColor + ';font-family:monospace;letter-spacing:-0.02em;">+' + theoEv.toFixed(1) + '%</span><div style="font-size:10px;color:#64748b;letter-spacing:0.08em;margin-top:1px;">THEO EV</div></div>';
     html += '</div>';
 
-    html += '<div style="text-align:center;min-width:90px">';
-    html += '<div style="display:flex;gap:8px;justify-content:center">';
-    html += '<div><div style="color:#64748b;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.5px">Yes</div><div style="color:#10b981;font-weight:700;font-size:1rem">' + yesPrice + '</div></div>';
-    html += '<div style="width:1px;background:#334155"></div>';
-    html += '<div><div style="color:#64748b;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.5px">No</div><div style="color:#ef4444;font-weight:700;font-size:1rem">' + noPrice + '</div></div>';
-    html += '</div>';
-    html += '<div style="color:' + sideColor + ';font-size:0.65rem;font-weight:600;margin-top:2px">' + side + " " + edgePct + '% edge</div>';
+    // Row 2: Question
+    html += '<div style="font-size:14px;font-weight:600;color:#e2e8f0;line-height:1.4;margin-bottom:6px;">' + question + '</div>';
+
+    // Row 3: Meta info
+    html += '<div style="display:flex;gap:14px;font-size:11px;color:#64748b;margin-bottom:14px;flex-wrap:wrap;">';
+    if (tl) html += '<span>\u23F1 Closes in ' + tl + '</span>';
+    html += '<span>\u25CB ' + (m.city || '') + '</span>';
+    html += '<span style="background:' + cc + ';color:#fff;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:0.04em;">' + cl + '</span>';
+    if (m.station) html += '<span>\u2708 ' + m.station + '</span>';
     html += '</div>';
 
-    html += '<div style="text-align:right;min-width:60px">';
-    html += '<div style="margin-bottom:3px">' + confDots + '</div>';
-    html += '<div style="color:#64748b;font-size:0.65rem">' + conf + '/5 conf</div>';
+    // Row 4: Key metrics
+    html += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#1e293b;border-radius:8px;overflow:hidden;margin-bottom:14px;">';
+
+    // Our Probability
+    html += '<div style="background:#0f172a;padding:10px 8px;text-align:center;"><div style="font-size:10px;color:#64748b;letter-spacing:0.06em;margin-bottom:3px;">OUR PROB</div><div style="font-size:18px;font-weight:700;color:#60a5fa;font-family:monospace;">' + ourProb + '%</div></div>';
+
+    // Market Price
+    html += '<div style="background:#0f172a;padding:10px 8px;text-align:center;"><div style="font-size:10px;color:#64748b;letter-spacing:0.06em;margin-bottom:3px;">MKT PRICE</div><div style="font-size:18px;font-weight:700;color:#94a3b8;font-family:monospace;">' + (side === 'YES' ? yesCents : noCents) + '\u00A2</div></div>';
+
+    // YES Price
+    html += '<div style="background:#0f172a;padding:10px 8px;text-align:center;"><div style="font-size:10px;color:#64748b;letter-spacing:0.06em;margin-bottom:3px;">YES</div><div style="font-size:18px;font-weight:700;color:#22c55e;font-family:monospace;">' + yesCents + '\u00A2</div></div>';
+
+    // NO Price
+    html += '<div style="background:#0f172a;padding:10px 8px;text-align:center;"><div style="font-size:10px;color:#64748b;letter-spacing:0.06em;margin-bottom:3px;">NO</div><div style="font-size:18px;font-weight:700;color:#ef4444;font-family:monospace;">' + noCents + '\u00A2</div></div>';
+
+    // Edge
+    html += '<div style="background:#0f172a;padding:10px 8px;text-align:center;"><div style="font-size:10px;color:#64748b;letter-spacing:0.06em;margin-bottom:3px;">' + side + ' EDGE</div><div style="font-size:18px;font-weight:700;color:' + edgeColor + ';font-family:monospace;">' + edge.toFixed(1) + '%</div></div>';
+
+    html += '</div>'; // end metrics grid
+
+    // Row 5: Model agreement bar
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">';
+    html += '<span style="font-size:10px;color:#64748b;letter-spacing:0.06em;white-space:nowrap;">MODEL AGREEMENT</span>';
+    html += '<div style="flex:1;height:6px;background:#1e293b;border-radius:3px;overflow:hidden;"><div style="width:' + confPct + '%;height:100%;background:' + confColor + ';border-radius:3px;transition:width 0.6s ease;"></div></div>';
+    html += '<span style="font-size:11px;font-weight:700;color:' + confColor + ';white-space:nowrap;">' + confPct + '% \u00B7 ' + confLabel + '</span>';
     html += '</div>';
+
+    // Row 6: Kelly stake + Polymarket link
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #1e293b;">';
+    html += '<span style="font-size:11px;color:#94a3b8;"><span style="color:#eab308;">\uD83D\uDD12</span> Kelly Stake: ' + kellyPct + '% bankroll (~$' + kellyOn1k + ' on $1000)</span>';
+    html += '<a href="' + polyUrl(m.slug) + '" target="_blank" rel="noopener" style="font-size:11px;color:#60a5fa;text-decoration:none;font-weight:600;">View on Polymarket \u2192</a>';
     html += '</div>';
+
+    html += '</div>'; // end card
   });
+
+  if (!markets.length) {
+    html = '<div style="text-align:center;color:#64748b;padding:40px 20px;font-size:14px;">Scan markets first to populate live signals</div>';
+  }
 
   sigList.innerHTML = html;
   window._signalMarkets = markets;
