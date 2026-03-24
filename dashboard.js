@@ -202,9 +202,12 @@ function populateSignals(markets) {
     s = s.replace(/Highest Temperature In /i, "High Temp ");
     s = s.replace(/Lowest Temperature In /i, "Low Temp ");
     s = s.replace(/ On /, " \u00B7 ");
+        s = s.replace(/(\d+)forabove$/i, "\u2265$1\u00B0F");
+    s = s.replace(/(\d+)forbelow$/i, "\u2264$1\u00B0F");
     s = s.replace(/(\d+)corhigher$/i, "\u2265$1\u00B0C");
     s = s.replace(/(\d+)corbelow$/i, "\u2264$1\u00B0C");
     s = s.replace(/ (\d+)c$/i, " $1\u00B0C");
+    s = s.replace(/ (\d+)f$/i, " $1\u00B0F");
     return s;
   }
 
