@@ -27,7 +27,7 @@ function scanMarkets() {
   var btn = document.querySelector('[onclick="scanMarkets()"]');
   if (btn) btn.innerHTML = '&#9202; Scanning...';
   addLog('Scanning Polymarket weather markets...');
-  fetch(API + '/api/scan')
+  fetch(API + '/api/scan', {method: 'POST'})
     .then(function(r){ return r.json(); })
     .then(function(data){
       var edges = data.edges || [];
