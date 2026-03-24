@@ -288,7 +288,7 @@ function saveConfig() {
   });
 }
 </script>
-<script>var _topTraders=[
+<script>var _topTradersFallback=[
 {rank:1,name:"gopfan2",pnl:230137,wins:282543,losses:52406,winRate:64.9,positions:285,active:91},
 {rank:2,name:"ColdMath",pnl:80782,wins:105980,losses:25198,winRate:82.3,positions:5971,active:909},
 {rank:3,name:"Hans323",pnl:80156,wins:91477,losses:11321,winRate:60.9,positions:2803,active:1},
@@ -298,8 +298,7 @@ function saveConfig() {
 {rank:7,name:"jangsunjuu",pnl:56600,wins:70200,losses:13600,winRate:88.0,positions:25,active:3},
 {rank:8,name:"0xaCc8e9dcaBf9",pnl:56500,wins:68000,losses:11500,winRate:49.0,positions:367,active:12},
 {rank:10,name:"CoffeeLover",pnl:51500,wins:62000,losses:10500,winRate:89.0,positions:18,active:5},
-{rank:12,name:"Kapii",pnl:46800,wins:58000,losses:11200,winRate:67.0,positions:24,active:2}
-];
+{rank:12,name:"Kapii",pnl:46800,wins:58000,losses:11200,winRate:67.0,positions:24,active:2}];
 function _genSparkline(pnl,winRate){
 var pts=[];var v=0;var s=pnl/20;
 for(var i=0;i<=20;i++){v+=s*(0.5+Math.random()*0.8);if(v>pnl*1.1)v=pnl*0.95;pts.push((i*5)+","+(100-(v/pnl)*80));}
@@ -307,13 +306,20 @@ pts[20]="100,15";
 var svg='<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:100%">';
 svg+='<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="transparent"/></linearGradient></defs>';
 svg+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="#22c55e" stroke-width="1.5" vector-effect="non-scaling-stroke"/>';
-svg+='<polyline points="'+pts.join(" ")+' 100,100 0,100" fill="url(#sg)" opacity="0.15"/>';
-svg+='</svg>';return svg;}
+svg+='<polyline points="'+pts.join(" ")+' 100,100 0,100" fill="url(#sg)" opacity="0.15"/></svg>';
+return svg;}
 function loadTopTraders(){
-var c=document.getElementById("top-traders-list");if(!c)return;var h="";
-_topTraders.forEach(function(t){
+var c=document.getElementById("top-traders-list");if(!c)return;
+c.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Fetching live trader data...</div>';
+fetch(API+"/api/traders").then(function(r){return r.json();}).then(function(d){
+var traders=d.ok&&d.traders?d.traders:_topTradersFallback;
+_renderTraders(traders,c);
+}).catch(function(e){console.error("Traders fetch failed:",e);_renderTraders(_topTradersFallback,c);});
+}
+function _renderTraders(traders,c){var h="";
+traders.forEach(function(t){
 var rc=t.rank===1?"#fbbf24":t.rank===2?"#94a3b8":t.rank===3?"#cd7f32":"#64748b";
-var ps="$"+t.pnl.toLocaleString();var ws="$"+t.wins.toLocaleString();var ls="$"+t.losses.toLocaleString();
+var ps="$"+Math.round(t.pnl).toLocaleString();var ws="$"+Math.round(t.wins).toLocaleString();var ls="$"+Math.round(t.losses).toLocaleString();
 var url="https://polymarketanalytics.com/traders?overallCategory=Weather&sortBy=rank&sortDesc=false";
 h+='<div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:16px">';
 h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">';
@@ -332,93 +338,57 @@ h+='<div style="background:rgba(15,23,42,0.9);padding:12px;text-align:center"><d
 h+='<div style="background:rgba(15,23,42,0.9);padding:12px;text-align:center"><div style="color:#22c55e;font-size:16px;font-weight:700">'+ws+'</div><div style="color:#64748b;font-size:10px;letter-spacing:1px;margin-top:2px">WON</div></div>';
 h+='<div style="background:rgba(15,23,42,0.9);padding:12px;text-align:center"><div style="color:#ef4444;font-size:16px;font-weight:700">'+ls+'</div><div style="color:#64748b;font-size:10px;letter-spacing:1px;margin-top:2px">LOST</div></div>';
 h+='</div>';
-h+='<div style="margin-bottom:12px;height:48px;position:relative;overflow:hidden;border-radius:8px;background:rgba(0,0,0,0.2)">';
-h+=_genSparkline(t.pnl,t.winRate);
-h+='</div>';
+h+='<div style="margin-bottom:12px;height:48px;position:relative;overflow:hidden;border-radius:8px;background:rgba(0,0,0,0.2)">'+_genSparkline(t.pnl,t.winRate)+'</div>';
 h+='<div style="text-align:right"><a href="'+url+'" target="_blank" style="color:#38bdf8;font-size:12px;text-decoration:none;opacity:0.7">View on Polymarket Analytics \u2192</a></div>';
 h+='</div>';
-});
-c.innerHTML=h;}</script><script>var _weatherCities=[
-{name:"London",country:"UK",lat:51.51,lon:-0.13},
-{name:"Paris",country:"FR",lat:48.86,lon:2.35},
-{name:"Tokyo",country:"JP",lat:35.68,lon:139.69},
-{name:"New York",country:"US",lat:40.71,lon:-74.01},
-{name:"Seoul",country:"KR",lat:37.57,lon:126.98},
-{name:"Sydney",country:"AU",lat:-33.87,lon:151.21},
-{name:"Mumbai",country:"IN",lat:19.08,lon:72.88},
-{name:"Dubai",country:"AE",lat:25.20,lon:55.27},
-{name:"Berlin",country:"DE",lat:52.52,lon:13.41},
-{name:"Moscow",country:"RU",lat:55.76,lon:37.62},
-{name:"Toronto",country:"CA",lat:43.65,lon:-79.38},
-{name:"Chicago",country:"US",lat:41.88,lon:-87.63},
-{name:"Miami",country:"US",lat:25.76,lon:-80.19},
-{name:"Dallas",country:"US",lat:32.78,lon:-96.80},
-{name:"Atlanta",country:"US",lat:33.75,lon:-84.39},
-{name:"Seattle",country:"US",lat:47.61,lon:-122.33},
-{name:"Mexico City",country:"MX",lat:19.43,lon:-99.13},
-{name:"Rome",country:"IT",lat:41.90,lon:12.50},
-{name:"Madrid",country:"ES",lat:40.42,lon:-3.70},
-{name:"Cairo",country:"EG",lat:30.04,lon:31.24},
-{name:"Lagos",country:"NG",lat:6.52,lon:3.38},
-{name:"Nairobi",country:"KE",lat:-1.29,lon:36.82},
-{name:"Johannesburg",country:"ZA",lat:-26.20,lon:28.05},
-{name:"Bangkok",country:"TH",lat:13.76,lon:100.50},
-{name:"Singapore",country:"SG",lat:1.35,lon:103.82},
-{name:"Manila",country:"PH",lat:14.60,lon:120.98},
-{name:"Jakarta",country:"ID",lat:-6.21,lon:106.85},
-{name:"Hong Kong",country:"HK",lat:22.32,lon:114.17},
-{name:"Taipei",country:"TW",lat:25.03,lon:121.57},
-{name:"Denver",country:"US",lat:39.74,lon:-104.99},
-{name:"Phoenix",country:"US",lat:33.45,lon:-112.07},
-{name:"San Francisco",country:"US",lat:37.77,lon:-122.42},
-{name:"Los Angeles",country:"US",lat:34.05,lon:-118.24},
-{name:"Lima",country:"PE",lat:-12.05,lon:-77.04},
-{name:"Buenos Aires",country:"AR",lat:-34.60,lon:-58.38},
-{name:"Oslo",country:"NO",lat:59.91,lon:10.75},
-{name:"S\u00e3o Paulo",country:"BR",lat:-23.55,lon:-46.63},
-{name:"Bogot\u00e1",country:"CO",lat:4.71,lon:-74.07}
-];
-function loadWeatherMap(){
+});c.innerHTML=h;}</script><script>function loadWeatherMap(){
 var mapEl=document.getElementById("weather-map-container");
 var statsEl=document.getElementById("weather-stats-row");
 var gridEl=document.getElementById("weather-city-grid");
 if(!mapEl)return;
+mapEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b">Loading live weather data...</div>';
+fetch(API+"/api/weather").then(function(r){return r.json();}).then(function(d){
+if(d.ok&&d.cities){_renderWeatherMap(d.cities,mapEl,statsEl,gridEl);}
+else{_renderWeatherMap(_fallbackCities(),mapEl,statsEl,gridEl);}
+}).catch(function(e){console.error("Weather fetch failed:",e);_renderWeatherMap(_fallbackCities(),mapEl,statsEl,gridEl);});
+}
+function _fallbackCities(){
+var names=[["London","UK",51.51,-0.13],["Paris","FR",48.86,2.35],["Tokyo","JP",35.68,139.69],["New York","US",40.71,-74.01],["Seoul","KR",37.57,126.98],["Sydney","AU",-33.87,151.21],["Mumbai","IN",19.08,72.88],["Dubai","AE",25.20,55.27],["Berlin","DE",52.52,13.41],["Moscow","RU",55.76,37.62],["Toronto","CA",43.65,-79.38],["Chicago","US",41.88,-87.63],["Miami","US",25.76,-80.19],["Dallas","US",32.78,-96.80],["Atlanta","US",33.75,-84.39],["Seattle","US",47.61,-122.33],["Mexico City","MX",19.43,-99.13],["Rome","IT",41.90,12.50],["Madrid","ES",40.42,-3.70],["Cairo","EG",30.04,31.24]];
+return names.map(function(n){return{name:n[0],country:n[1],lat:n[2],lon:n[3],temp:Math.round(5+Math.random()*25),humidity:Math.round(40+Math.random()*50),precip:Math.random()<0.15?+(Math.random()*5).toFixed(1):0,cloud:Math.round(Math.random()*100),code:0};});}
+function _renderWeatherMap(cities,mapEl,statsEl,gridEl){
 mapEl.innerHTML="";
 if(window._wxMap){try{window._wxMap.remove();}catch(e){}window._wxMap=null;}
 var map=L.map(mapEl,{center:[20,0],zoom:2,minZoom:2,maxZoom:8,zoomControl:true,attributionControl:false});
 window._wxMap=map;
 L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19}).addTo(map);
-_weatherCities.forEach(function(c){
-var temp=Math.round(5+Math.random()*25);
-var hum=Math.round(40+Math.random()*50);
-var prec=Math.random()<0.15?(Math.random()*5).toFixed(1):"0.0";
-c._t=temp;c._h=hum;c._p=parseFloat(prec);c._cond=c._p>0?"Rain":"Dry";
-var mc=c._p>2?"#ef4444":c._p>0?"#fbbf24":"#38bdf8";
+cities.forEach(function(c){
+var p=c.precip||0;var cond=p>0?"Rain":"Dry";
+var mc=p>2?"#ef4444":p>0?"#fbbf24":"#38bdf8";
 var icon=L.divIcon({className:"",html:'<div style="background:'+mc+';width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);box-shadow:0 0 8px '+mc+'40"></div>',iconSize:[14,14],iconAnchor:[7,7]});
 var m=L.marker([c.lat,c.lon],{icon:icon}).addTo(map);
-m.bindTooltip('<div style="font-size:12px;font-weight:600">'+c.name+'</div><div style="font-size:11px;color:#94a3b8">'+temp+'\u00b0C \u00b7 '+hum+'% \u00b7 '+prec+' mm/h</div>',{permanent:false,direction:"top",className:"wx-tooltip"});
+m.bindTooltip('<div style="font-size:12px;font-weight:600">'+c.name+'</div><div style="font-size:11px;color:#94a3b8">'+c.temp+'\u00b0C \u00b7 '+c.humidity+'% \u00b7 '+p.toFixed(1)+' mm/h</div>',{permanent:false,direction:"top",className:"wx-tooltip"});
 L.marker([c.lat,c.lon],{icon:L.divIcon({className:"",html:'<div style="color:#94a3b8;font-size:10px;white-space:nowrap;text-shadow:0 0 4px #0f172a,0 0 8px #0f172a">'+c.name+'</div>',iconSize:[80,14],iconAnchor:[40,-8]})}).addTo(map);
 });
-var raining=_weatherCities.filter(function(c){return c._p>0;}).length;
-var heavy=_weatherCities.filter(function(c){return c._p>2;}).length;
-var maxP=Math.max.apply(null,_weatherCities.map(function(c){return c._p;}));
-var avgH=Math.round(_weatherCities.reduce(function(s,c){return s+c._h;},0)/_weatherCities.length);
+var raining=cities.filter(function(c){return(c.precip||0)>0;}).length;
+var heavy=cities.filter(function(c){return(c.precip||0)>2;}).length;
+var maxP=Math.max.apply(null,cities.map(function(c){return c.precip||0;}));
+var avgH=Math.round(cities.reduce(function(s,c){return s+(c.humidity||0);},0)/cities.length);
 if(statsEl){statsEl.innerHTML=[
 {v:raining,l:"CITIES RAINING",c:"#38bdf8"},
 {v:heavy,l:"HEAVY RAIN",c:"#fbbf24"},
 {v:maxP.toFixed(1)+"<span style=\"font-size:12px\">mm</span>",l:"MAX PRECIP",c:"#ef4444"},
 {v:avgH+"%",l:"AVG HUMIDITY",c:"#a78bfa"}
 ].map(function(s){return '<div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px;text-align:center"><div style="color:'+s.c+';font-size:28px;font-weight:700;font-family:monospace">'+s.v+'</div><div style="color:#64748b;font-size:10px;letter-spacing:1px;margin-top:4px">'+s.l+'</div></div>';}).join("");}
-if(gridEl){gridEl.innerHTML=_weatherCities.slice(0,20).map(function(c){
-var ic=c._p>2?"\ud83c\udf27\ufe0f":c._p>0?"\ud83c\udf26\ufe0f":"\u2600\ufe0f";
-var cl=Math.round(Math.random()*100);
+if(gridEl){gridEl.innerHTML=cities.slice(0,20).map(function(c){
+var p=c.precip||0;var cond=p>0?"Rain":"Dry";
+var ic=p>2?"\ud83c\udf27\ufe0f":p>0?"\ud83c\udf26\ufe0f":"\u2600\ufe0f";
 return '<div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between">'+
 '<div style="display:flex;align-items:center;gap:12px">'+
 '<div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;font-size:18px">'+ic+'</div>'+
 '<div><div style="color:#fff;font-weight:600;font-size:14px">'+c.name+' <span style="color:#64748b;font-size:11px">'+c.country+'</span></div>'+
-'<div style="color:#64748b;font-size:11px">'+c._cond+' '+c._t+'\u00b0C \ud83d\udca7'+c._h+'% \u2601'+cl+'%</div></div>'+
+'<div style="color:#64748b;font-size:11px">'+cond+' '+c.temp+'\u00b0C \ud83d\udca7'+c.humidity+'% \u2601'+(c.cloud||0)+'%</div></div>'+
 '</div>'+
-'<div style="color:'+(c._p>0?"#38bdf8":"#64748b")+';font-size:18px;font-weight:700;font-family:monospace">'+c._p.toFixed(1)+'<span style="font-size:11px;color:#64748b"> mm/h</span></div>'+
+'<div style="color:'+(p>0?"#38bdf8":"#64748b")+';font-size:18px;font-weight:700;font-family:monospace">'+p.toFixed(1)+'<span style="font-size:11px;color:#64748b"> mm/h</span></div>'+
 '</div>';
 }).join("");}
 setTimeout(function(){map.invalidateSize();},300);
@@ -427,5 +397,5 @@ var _origSt2=window._st;
 if(_origSt2){window._st=function(tab,btn){
 _origSt2(tab,btn);
 if(tab==="traders"&&document.getElementById("top-traders-list")&&!document.getElementById("top-traders-list").innerHTML.trim()){loadTopTraders();}
-if(tab==="rainmap"&&document.getElementById("weather-map-container")&&!document.getElementById("weather-map-container").innerHTML.trim()){setTimeout(loadWeatherMap,200);}
+if(tab==="rainmap"&&document.getElementById("weather-map-container")){setTimeout(loadWeatherMap,200);}
 };}</script></body></html>
