@@ -299,22 +299,19 @@ function saveConfig() {
 {rank:8,name:"0xaCc8e9dcaBf9",pnl:56500,wins:68000,losses:11500,winRate:49.0,positions:367,active:12},
 {rank:10,name:"CoffeeLover",pnl:51500,wins:62000,losses:10500,winRate:89.0,positions:18,active:5},
 {rank:12,name:"Kapii",pnl:46800,wins:58000,losses:11200,winRate:67.0,positions:24,active:2}];
-function _genSparkline(pnl,winRate){
-var pts=[];var v=0;var s=pnl/20;
-for(var i=0;i<=20;i++){v+=s*(0.5+Math.random()*0.8);if(v>pnl*1.1)v=pnl*0.95;pts.push((i*5)+","+(100-(v/pnl)*80));}
-pts[20]="100,15";
-var svg='<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:100%">';
-svg+='<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="transparent"/></linearGradient></defs>';
-svg+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="#22c55e" stroke-width="1.5" vector-effect="non-scaling-stroke"/>';
-svg+='<polyline points="'+pts.join(" ")+' 100,100 0,100" fill="url(#sg)" opacity="0.15"/></svg>';
-return svg;}
+function _genSparkline(pnl,wr){var pts=[];var v=0;var s=pnl/20;for(var i=0;i<=20;i++){v+=s*(0.5+Math.random()*0.8);if(v>pnl*1.1)v=pnl*0.95;pts.push((i*5)+","+(100-(v/pnl)*80));}pts[20]="100,15";return'<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:100%"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="transparent"/></linearGradient></defs><polyline points="'+pts.join(" ")+'" fill="none" stroke="#22c55e" stroke-width="1.5" vector-effect="non-scaling-stroke"/><polyline points="'+pts.join(" ")+' 100,100 0,100" fill="url(#sg)" opacity="0.15"/></svg>';}
+function _normalizeTrader(t){
+if(t.trader_name){return{rank:t.rank||0,name:t.trader_name,pnl:t.overall_gain||0,wins:t.win_amount||0,losses:Math.abs(t.loss_amount||0),winRate:Math.round((t.win_rate||0)*1000)/10,positions:t.total_positions||0,active:t.active_positions||0};}
+return t;}
 function loadTopTraders(){
 var c=document.getElementById("top-traders-list");if(!c)return;
-c.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">Fetching live trader data...</div>';
+c.innerHTML='<div style="text-align:center;padding:40px;color:#64748b"><div style="margin-bottom:8px">\u26a1 Fetching live trader data from Polymarket...</div><div style="color:#475569;font-size:12px">Powered by Polymarket Analytics API</div></div>';
 fetch(API+"/api/traders").then(function(r){return r.json();}).then(function(d){
-var traders=d.ok&&d.traders?d.traders:_topTradersFallback;
-_renderTraders(traders,c);
-}).catch(function(e){console.error("Traders fetch failed:",e);_renderTraders(_topTradersFallback,c);});
+var raw=d.traders||[];
+var traders=raw.map(_normalizeTrader);
+if(traders.length>0){_renderTraders(traders,c);}
+else{_renderTraders(_topTradersFallback,c);}
+}).catch(function(e){console.error("Traders fetch:",e);_renderTraders(_topTradersFallback,c);});
 }
 function _renderTraders(traders,c){var h="";
 traders.forEach(function(t){
@@ -346,15 +343,15 @@ var mapEl=document.getElementById("weather-map-container");
 var statsEl=document.getElementById("weather-stats-row");
 var gridEl=document.getElementById("weather-city-grid");
 if(!mapEl)return;
-mapEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b">Loading live weather data...</div>';
-fetch(API+"/api/weather").then(function(r){return r.json();}).then(function(d){
-if(d.ok&&d.cities){_renderWeatherMap(d.cities,mapEl,statsEl,gridEl);}
+mapEl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b"><div style="text-align:center"><div style="margin-bottom:8px">\ud83c\udf0d Loading live weather data...</div><div style="color:#475569;font-size:12px">Powered by Open-Meteo API</div></div></div>';
+fetch(API+"/api/weather").then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(d){
+if(d.ok&&d.cities&&d.cities.length>0){_renderWeatherMap(d.cities,mapEl,statsEl,gridEl);}
 else{_renderWeatherMap(_fallbackCities(),mapEl,statsEl,gridEl);}
-}).catch(function(e){console.error("Weather fetch failed:",e);_renderWeatherMap(_fallbackCities(),mapEl,statsEl,gridEl);});
+}).catch(function(e){console.error("Weather:",e);_renderWeatherMap(_fallbackCities(),mapEl,statsEl,gridEl);});
 }
 function _fallbackCities(){
-var names=[["London","UK",51.51,-0.13],["Paris","FR",48.86,2.35],["Tokyo","JP",35.68,139.69],["New York","US",40.71,-74.01],["Seoul","KR",37.57,126.98],["Sydney","AU",-33.87,151.21],["Mumbai","IN",19.08,72.88],["Dubai","AE",25.20,55.27],["Berlin","DE",52.52,13.41],["Moscow","RU",55.76,37.62],["Toronto","CA",43.65,-79.38],["Chicago","US",41.88,-87.63],["Miami","US",25.76,-80.19],["Dallas","US",32.78,-96.80],["Atlanta","US",33.75,-84.39],["Seattle","US",47.61,-122.33],["Mexico City","MX",19.43,-99.13],["Rome","IT",41.90,12.50],["Madrid","ES",40.42,-3.70],["Cairo","EG",30.04,31.24]];
-return names.map(function(n){return{name:n[0],country:n[1],lat:n[2],lon:n[3],temp:Math.round(5+Math.random()*25),humidity:Math.round(40+Math.random()*50),precip:Math.random()<0.15?+(Math.random()*5).toFixed(1):0,cloud:Math.round(Math.random()*100),code:0};});}
+var n=[["London","UK",51.51,-0.13],["Paris","FR",48.86,2.35],["Tokyo","JP",35.68,139.69],["New York","US",40.71,-74.01],["Seoul","KR",37.57,126.98],["Sydney","AU",-33.87,151.21],["Mumbai","IN",19.08,72.88],["Dubai","AE",25.20,55.27],["Berlin","DE",52.52,13.41],["Moscow","RU",55.76,37.62],["Toronto","CA",43.65,-79.38],["Chicago","US",41.88,-87.63],["Miami","US",25.76,-80.19],["Dallas","US",32.78,-96.80],["Atlanta","US",33.75,-84.39],["Seattle","US",47.61,-122.33],["Mexico City","MX",19.43,-99.13],["Rome","IT",41.90,12.50],["Madrid","ES",40.42,-3.70],["Cairo","EG",30.04,31.24]];
+return n.map(function(c){return{name:c[0],country:c[1],lat:c[2],lon:c[3],temp:Math.round(5+Math.random()*25),humidity:Math.round(40+Math.random()*50),precip:Math.random()<0.15?+(Math.random()*5).toFixed(1):0,cloud:Math.round(Math.random()*100)};});}
 function _renderWeatherMap(cities,mapEl,statsEl,gridEl){
 mapEl.innerHTML="";
 if(window._wxMap){try{window._wxMap.remove();}catch(e){}window._wxMap=null;}
@@ -362,7 +359,7 @@ var map=L.map(mapEl,{center:[20,0],zoom:2,minZoom:2,maxZoom:8,zoomControl:true,a
 window._wxMap=map;
 L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19}).addTo(map);
 cities.forEach(function(c){
-var p=c.precip||0;var cond=p>0?"Rain":"Dry";
+var p=c.precip||0;
 var mc=p>2?"#ef4444":p>0?"#fbbf24":"#38bdf8";
 var icon=L.divIcon({className:"",html:'<div style="background:'+mc+';width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);box-shadow:0 0 8px '+mc+'40"></div>',iconSize:[14,14],iconAnchor:[7,7]});
 var m=L.marker([c.lat,c.lon],{icon:icon}).addTo(map);
@@ -373,23 +370,11 @@ var raining=cities.filter(function(c){return(c.precip||0)>0;}).length;
 var heavy=cities.filter(function(c){return(c.precip||0)>2;}).length;
 var maxP=Math.max.apply(null,cities.map(function(c){return c.precip||0;}));
 var avgH=Math.round(cities.reduce(function(s,c){return s+(c.humidity||0);},0)/cities.length);
-if(statsEl){statsEl.innerHTML=[
-{v:raining,l:"CITIES RAINING",c:"#38bdf8"},
-{v:heavy,l:"HEAVY RAIN",c:"#fbbf24"},
-{v:maxP.toFixed(1)+"<span style=\"font-size:12px\">mm</span>",l:"MAX PRECIP",c:"#ef4444"},
-{v:avgH+"%",l:"AVG HUMIDITY",c:"#a78bfa"}
-].map(function(s){return '<div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px;text-align:center"><div style="color:'+s.c+';font-size:28px;font-weight:700;font-family:monospace">'+s.v+'</div><div style="color:#64748b;font-size:10px;letter-spacing:1px;margin-top:4px">'+s.l+'</div></div>';}).join("");}
+if(statsEl){statsEl.innerHTML=[{v:raining,l:"CITIES RAINING",c:"#38bdf8"},{v:heavy,l:"HEAVY RAIN",c:"#fbbf24"},{v:maxP.toFixed(1)+"<span style=\"font-size:12px\">mm</span>",l:"MAX PRECIP",c:"#ef4444"},{v:avgH+"%",l:"AVG HUMIDITY",c:"#a78bfa"}].map(function(s){return '<div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px;text-align:center"><div style="color:'+s.c+';font-size:28px;font-weight:700;font-family:monospace">'+s.v+'</div><div style="color:#64748b;font-size:10px;letter-spacing:1px;margin-top:4px">'+s.l+'</div></div>';}).join("");}
 if(gridEl){gridEl.innerHTML=cities.slice(0,20).map(function(c){
 var p=c.precip||0;var cond=p>0?"Rain":"Dry";
 var ic=p>2?"\ud83c\udf27\ufe0f":p>0?"\ud83c\udf26\ufe0f":"\u2600\ufe0f";
-return '<div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between">'+
-'<div style="display:flex;align-items:center;gap:12px">'+
-'<div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;font-size:18px">'+ic+'</div>'+
-'<div><div style="color:#fff;font-weight:600;font-size:14px">'+c.name+' <span style="color:#64748b;font-size:11px">'+c.country+'</span></div>'+
-'<div style="color:#64748b;font-size:11px">'+cond+' '+c.temp+'\u00b0C \ud83d\udca7'+c.humidity+'% \u2601'+(c.cloud||0)+'%</div></div>'+
-'</div>'+
-'<div style="color:'+(p>0?"#38bdf8":"#64748b")+';font-size:18px;font-weight:700;font-family:monospace">'+p.toFixed(1)+'<span style="font-size:11px;color:#64748b"> mm/h</span></div>'+
-'</div>';
+return '<div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;font-size:18px">'+ic+'</div><div><div style="color:#fff;font-weight:600;font-size:14px">'+c.name+' <span style="color:#64748b;font-size:11px">'+c.country+'</span></div><div style="color:#64748b;font-size:11px">'+cond+' '+c.temp+'\u00b0C \ud83d\udca7'+c.humidity+'% \u2601'+(c.cloud||0)+'%</div></div></div><div style="color:'+(p>0?"#38bdf8":"#64748b")+';font-size:18px;font-weight:700;font-family:monospace">'+p.toFixed(1)+'<span style="font-size:11px;color:#64748b"> mm/h</span></div></div>';
 }).join("");}
 setTimeout(function(){map.invalidateSize();},300);
 }
