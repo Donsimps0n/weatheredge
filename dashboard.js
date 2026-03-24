@@ -1,6 +1,6 @@
 /* ===== WeatherEdge v2 Dashboard Logic ===== */
 /* Change this URL when v2 API is deployed */
-const API = 'https://weatheredge-production.up.railway.app';
+const API = 'https://weatheredge-bot-v2-production.up.railway.app';
 
 /* ---- Sidebar Navigation ---- */
 window._st = function(tab, btn) {
@@ -98,14 +98,21 @@ function scanMarkets() {
 
 /* ---- Toggle Bot ---- */
 var _botOn = false;
-function toggleBot() {
-  _botOn = !_botOn;
-  var tx = document.getElementById('btn-start-text');
-  var bt = document.getElementById('btn-start');
-  if (tx) tx.textContent = _botOn ? 'Stop Bot' : 'Start Bot';
-  if (bt) bt.style.background = _botOn ? 'linear-gradient(135deg,#ef4444,#dc2626)' : '';
-  addLog('Bot ' + (_botOn ? 'started (paper mode)' : 'stopped'));
-  if (_botOn) scanMarkets();
+function toggleBot(){
+  var tx=document.getElementById('btn-start-text');
+  var bt=document.getElementById('btn-start');
+  if(tx.textContent.trim()==='Start Bot'){
+    tx.textContent='Stop Bot';
+    bt.style.background='linear-gradient(135deg,#ef4444,#dc2626)';
+    addLog('Bot started - scanning every 60s');
+    scanMarkets();
+    window._botInterval=setInterval(function(){ scanMarkets(); },60000);
+  } else {
+    tx.textContent='Start Bot';
+    bt.style.background='linear-gradient(135deg,#22c55e,#16a34a)';
+    if(window._botInterval){clearInterval(window._botInterval);window._botInterval=null;}
+    addLog('Bot stopped');
+  }
 }
 
 /* ---- Set Trading Mode ---- */
@@ -121,82 +128,52 @@ function setMode(btn, mode) {
 function analyzeTop15() { scanMarkets(); }
 
 /* ---- Load initial data ---- */
-function _boot() {
-  addLog('Connecting to WeatherEdge v2 API...');
-  fetch(API + '/api/stats')
-    .then(function(r){ return r.json(); })
-    .then(function(s){
-      var em = document.getElementById('stat-markets');
-      if (em) em.textContent = s.markets_scanned || 0;
-      var ee = document.getElementById('stat-edge');
-      if (ee) ee.textContent = s.edges_found || 0;
-      var el = document.getElementById('stat-live');
-      if (el) el.textContent = s.live_edges || 0;
-      /* Update model badges */
-      var mb = document.getElementById('model-badges');
-      if (mb && s.models) {
-        mb.innerHTML = s.models.map(function(m){
-          return '<span style="display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:11px;background:#1e293b;color:#22c55e;border:1px solid #22c55e40">' + m + '</span>';
-        }).join('');
-      }
-      addLog('Connected - mode: ' + (s.bot_mode || 'PAPER') + ', models: ' + (s.models||[]).join(', '));
-    })
-    .catch(function(e){ addLog('API connection failed: ' + e.message); });
+function _boot(){
+  // Trading Status
+  fetch(API+'/api/trading/status').then(function(r){return r.json();}).then(function(data){
+    var sm=document.getElementById('stat-markets');
+    if(sm) sm.textContent=data.trading_enabled?'LIVE':'OFF';
+    var se=document.getElementById('stat-edge');
+    if(se) se.textContent=data.credentials_active?'Active':'Inactive';
+    var sl=document.getElementById('stat-live');
+    if(sl) sl.textContent=data.recent_trades||0;
+    var mb=document.getElementById('model-badges');
+    if(mb) mb.innerHTML='<span class="badge">v2</span>';
+    addLog('API connected - trading '+(data.trading_enabled?'enabled':'disabled'));
+  }).catch(function(e){addLog('API connection failed: '+e.message);});
 
-  fetch(API + '/api/positions')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if (!Array.isArray(data)) return;
-      var pc = document.getElementById('pos-count');
-      if (pc) pc.textContent = data.length;
-      var op = document.getElementById('open-positions');
-      if (op && data.length > 0) {
-        op.innerHTML = data.map(function(p){
-          return '<div style="padding:8px;border-bottom:1px solid #1e293b;font-size:13px;color:#e2e8f0">'
-            + (p.question || 'Position') + ' &mdash; $' + (p.amount||0)
-            + '</div>';
+  // Signals (positions)
+  fetch(API+'/api/signals').then(function(r){return r.json();}).then(function(data){
+    var pc=document.getElementById('pos-count');
+    if(pc) pc.textContent=data.count||0;
+    var op=document.getElementById('open-positions');
+    if(op){
+      if(!data.signals||data.signals.length===0){
+        op.innerHTML='<div class="empty">No active signals</div>';
+      } else {
+        op.innerHTML=data.signals.map(function(s){
+          return '<div class="pos-row"><span>'+s.question+'</span><span>'+((s.edge*100).toFixed(1))+'%</span></div>';
         }).join('');
       }
-    }).catch(function(){});
+    }
+  }).catch(function(e){addLog('Signals fetch failed: '+e.message);});
 
-  fetch(API + '/api/history')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if (!Array.isArray(data)) return;
-      var th = document.getElementById('trade-history');
-      if (th && data.length > 0) {
-        th.innerHTML = data.slice(0,20).map(function(t){
-          var pnl = t.pnl || 0;
-          var color = pnl >= 0 ? '#22c55e' : '#ef4444';
-          return '<div style="padding:8px;border-bottom:1px solid #1e293b;font-size:13px">'
-            + '<span style="color:#e2e8f0">' + (t.question||'Trade') + '</span>'
-            + ' <span style="color:' + color + '">' + (pnl>=0?'+':'') + pnl.toFixed(2) + '</span>'
-            + '</div>';
+  // Trade Log (history)
+  fetch(API+'/api/trading/log').then(function(r){return r.json();}).then(function(data){
+    var th=document.getElementById('trade-history');
+    if(th){
+      if(!data.trades||data.trades.length===0){
+        th.innerHTML='<div class="empty">No trades yet</div>';
+      } else {
+        th.innerHTML=data.trades.slice(-20).reverse().map(function(t){
+          return '<div class="trade-row"><span>'+(t.question||t.market||'Trade')+'</span><span>$'+(t.amount||0)+'</span><span>'+new Date(t.ts*1000).toLocaleString()+'</span></div>';
         }).join('');
       }
-    }).catch(function(){});
+    }
+  }).catch(function(e){addLog('Trade log fetch failed: '+e.message);});
 
-  /* Load traders - API only, no fallback */
-  fetch(API + '/api/traders')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      var traders = data.traders || data;
-      if (!Array.isArray(traders)) return;
-      var lb = document.getElementById('lb-body');
-      if (lb) {
-        lb.innerHTML = traders.slice(0,15).map(function(t){
-          return '<tr>'
-            + '<td style="padding:6px">' + (t.rank||'-') + '</td>'
-            + '<td style="padding:6px;color:#e2e8f0">' + (t.trader_name||t.trader||'Anon').slice(0,14) + '</td>'
-            + '<td style="padding:6px;color:#22c55e">$' + ((t.overall_gain||0)/1000).toFixed(1) + 'k</td>'
-            + '<td style="padding:6px">' + ((t.win_rate||0)*100).toFixed(0) + '%</td>'
-            + '<td style="padding:6px">' + (t.event_ct||0) + '</td>'
-            + '</tr>';
-        }).join('');
-      }
-    }).catch(function(){
-      var lb = document.getElementById('lb-body');
-      if (lb) lb.innerHTML = '<tr><td colspan="5" style="padding:16px;color:#64748b;text-align:center">Leaderboard unavailable</td></tr>';
-    });
+  // Leaderboard placeholder
+  var lb=document.getElementById('lb-body');
+  if(lb) lb.innerHTML='<tr><td colspan="4">Leaderboard not available in v2</td></tr>';
 }
 _boot();
