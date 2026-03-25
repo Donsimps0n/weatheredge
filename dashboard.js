@@ -532,7 +532,7 @@ function populateSignals(markets) {
         .then(function() { return fetch(API + "/api/signals"); })
         .then(function(r) { return r.json(); })
         .then(function(data) {
-          if (data.markets && data.markets.length > 0) populateSignals(data.signals || data.markets || []);
+          if (data.signals && data.signals.length > 0) populateSignals(data.signals || data.markets || []);
         })
         .catch(function(e) { console.log("[WE] Scan populate error:", e); });
     }, 500);
@@ -546,8 +546,8 @@ function populateSignals(markets) {
       .then(function() { return fetch(API + "/api/signals"); })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        console.log("[WE] Auto-scan got " + (data.markets ? data.markets.length : 0) + " markets");
-        if (data.markets && data.markets.length > 0) {
+        console.log("[WE] Auto-scan got " + (data.signals ? data.signals.length : 0) + " signals");
+        if (data.signals && data.signals.length > 0) {
           populateSignals(data.signals || data.markets || []);
         } else {
           if (badge) { badge.textContent = "NO DATA"; badge.style.background = "#ef4444"; }
