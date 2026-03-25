@@ -382,13 +382,13 @@ function populateSignals(markets) {
     var yesEdge = (0.5 - yesPrice) * 100;
     var noEdge = (0.5 - noPrice) * 100;
     var side, edge, sidePrice;
-    if (yesEdge >= noEdge) {
-      side = 'YES'; edge = yesEdge; sidePrice = yesPrice;
+    if (m.signal && m.signal.includes('NO')) {
+      side = 'NO'; edge = m.theo_ev || noEdge; sidePrice = noPrice;
     } else {
-      side = 'NO'; edge = noEdge; sidePrice = noPrice;
+      side = 'YES'; edge = m.theo_ev || yesEdge; sidePrice = yesPrice;
     }
     if (edge < 0) edge = 0;
-    var theoEv = edge;
+    var theoEv = m.theo_ev || edge;
 
     // Kelly stake (fractional kelly 0.25)
     var kellyFrac = 0;
@@ -403,11 +403,11 @@ function populateSignals(markets) {
         kellyFrac = kellyFrac * 0.25;
       }
     }
-    var kellyPct = (kellyFrac * 100).toFixed(1);
-    var kellyOn1k = Math.round(kellyFrac * 1000);
+    var kellyPct = m.kelly ? m.kelly.toFixed(1) : (kellyFrac * 100).toFixed(1);
+    var kellyOn1k = m.kelly ? Math.round(m.kelly * 10) : Math.round(kellyFrac * 1000);
 
     // Probability estimate
-    var ourProb = Math.min(99, Math.round((sidePrice + edge / 100) * 100));
+    var ourProb = Math.round(m.our_prob || 50);
 
     // Model agreement from confidence
     var confPct = m.confidence ? Math.round((m.confidence / 5) * 100) : 60;
