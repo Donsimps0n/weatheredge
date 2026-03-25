@@ -407,7 +407,7 @@ function populateSignals(markets) {
     var kellyOn1k = m.kelly ? Math.round(m.kelly * 10) : Math.round(kellyFrac * 1000);
 
     // Probability estimate
-    var ourProb = Math.round(m.our_prob || 50);
+    var ourProb = m.our_prob ? Math.round(m.our_prob) : Math.min(99, Math.max(1, Math.round((sidePrice + edge / 100) * 100)));
 
     // Model agreement from confidence
     var confPct = m.confidence ? Math.round((m.confidence / 5) * 100) : 60;
@@ -529,9 +529,10 @@ function populateSignals(markets) {
     if (_origScan) _origScan();
     setTimeout(function() {
       fetch(API + "/api/scan", {method: "POST"})
+        .then(function() { return fetch(API + "/api/signals"); })
         .then(function(r) { return r.json(); })
         .then(function(data) {
-          if (data.markets && data.markets.length > 0) populateSignals(data.markets);
+          if (data.markets && data.markets.length > 0) populateSignals(data.signals || data.markets || []);
         })
         .catch(function(e) { console.log("[WE] Scan populate error:", e); });
     }, 500);
@@ -542,11 +543,12 @@ function populateSignals(markets) {
     var badge = document.getElementById("signals-scan-badge");
     if (badge) { badge.textContent = "SCANNING..."; badge.style.background = "#64748b"; }
     fetch(API + "/api/scan", {method: "POST"})
+      .then(function() { return fetch(API + "/api/signals"); })
       .then(function(r) { return r.json(); })
       .then(function(data) {
         console.log("[WE] Auto-scan got " + (data.markets ? data.markets.length : 0) + " markets");
         if (data.markets && data.markets.length > 0) {
-          populateSignals(data.markets);
+          populateSignals(data.signals || data.markets || []);
         } else {
           if (badge) { badge.textContent = "NO DATA"; badge.style.background = "#ef4444"; }
         }
